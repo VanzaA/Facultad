@@ -1,0 +1,50 @@
+En un supermercado hay 7 cajas para pagar. Existen C clientes que hacen las compras y luego se dirigen a pagar a la caja donde haya menos gente esperando, espera a ser atendido por la caja y luego de pagar se retira. Nota: maximizar la concurrencia, no se pueden usar funciones auxiliares.
+
+array cajas_chan[1..7] of chan;
+
+
+process Cliente: [id=1..C] {
+
+	send pedirCaja();
+	receive darCaja[p](cajaMinima);
+	// ya sabe cual es la caja donde hay menos gente esperando
+	send irCaja[cajaMinima](p);
+	receive atencion[p](c);
+	// se va
+}
+
+process Caja: [id=1..7]{
+	while(true){
+		receive irCaja[id](p);
+		delay(random);
+		send atencion[p](id);
+		send liberarCaja(id);
+	}
+}
+
+process Administrador:: {
+
+int cajaMinima;
+int min=9999;
+array cant_personas[1..7] of integer=([7] 0);
+
+	while (true){
+		if (notempty (pedirCaja));
+			receive => pedirCaja();
+			// calcular caja minima //
+			for (int i=1;i<=7;i++){
+	          if(cant_personas[i] < min){
+	            cajaMinima =i;
+	            min = cant_personas[i] ;
+	          }
+	        }
+	        cant_personas[cajaMinima]++;
+
+			send => darCaja[cajaMinima](p);
+
+		* (notempty (liberarCaja));
+			receive => liberarCaja();
+			send => liberarCaja(c);
+			cant_personas[c] --;
+	}	
+}

@@ -1,0 +1,30 @@
+int cola[];
+
+Process Unidad{
+  while(true){
+      Buffer!libre(i);
+      Buffer?señal(i);
+      //Procesa
+  }
+
+}
+
+Process Radar[i:1..10]{
+  while(true){
+    Buffer!señal(i);
+    delay(15);
+  }
+
+}
+
+Process Buffer{
+  while(true){
+
+      if(Radar[*]?señal(i))->
+          cola.push(i);
+      if(!cola.empty; Unidad?libre(i))->
+          Unidad!señal(cola.pop());
+          
+  }
+
+}

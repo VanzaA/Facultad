@@ -1,0 +1,41 @@
+En un banco se tiene un sistema que administra el uso de una sala de reuniones por parte de N clientes. Los clientes se clasifican en Habituales y Temporales. La sala puede ser usada por un único cliente a la vez, y cuando está libre se debe determinar a quién permitirle su uso dando prioridad a los clientes Habituales. Dentro de cada clase de cliente se debe respetar el orden de llegar.
+Nota: suponga que existe una funcion Tipo() que le indica al cliente de que tipo es.
+
+process Cliente: [id=1..N]{
+string tipo;
+
+	tipo= Tipo();
+	Admin! pedirSala(id,tipo);
+	Admin? darSala(id,tipo);
+	// usa la sala
+	Admin! liberarSala;
+	// se va
+}
+
+process Sala:: {
+	while (true) {
+		Admin!libre();
+		Admin?usar(id);
+		// el cliente usa la sala
+	}
+}
+
+
+process Admin:: {
+queue colaT;
+queue colaH;
+
+	while (true){
+		if (true); Cliente? pedirSala(id, tipo) -> if (tipo = "Temporal") {
+														push (colaT,id);
+													} else {
+														push (colaH, id);
+													}
+
+		* (notempty(colaH)); Sala?libre(); -> pop (colaH, id);
+											  Sala! usar(id);
+
+		* (notempty(colaT) and (empty(colaH))); Sala?libre(); -> pop (colaT, id);
+											  					 Sala! usar(id);
+	}
+}

@@ -1,0 +1,38 @@
+Para una competencia de carrera en equipos, se debe llevar la cuenta de cuantos equipos han terminado su participacion por medio de un contador compartido. Existen 100 participantes distribuidos en equipos de 5 personas (cada persona conoce de antemano a que equipo pertenece llamando a la funcion DarEquipo). Cada persona cuando llega comienza a correr (no debe sincronizar con el resto de los competidores para empezar), y al terminar debe esperar al resto de su equipo; cuando los 5 integrantes de un equipo han terminado su carrera se incrementa en 1 el contador compartido. 
+Nota: maximizar la concurrencia.
+
+
+
+Process Participante: [id=1..10] {
+	equipo = DarEquipo();
+	// empieza a correr
+	EsperarEquipo[equipo].esperar();
+	//se va
+}
+
+
+Monitor Contador:: {
+
+int cant_equipos = 0;
+
+	procedure incrementar(){
+		cant_equipos ++;
+	}
+}
+
+Monitor EsperarEquipo:[id=1..5]{
+
+int cantParticipantes = 0;	
+cond esperarParticipantes;
+
+	procedure esperar(){
+		cantParticipantes ++;
+		if(cantParticipantes < 5) {
+			wait(esperar_participantes);
+		} else {
+			signal_all(esperar_participantes);
+			Contador.incrementar();
+		}
+	}
+
+}

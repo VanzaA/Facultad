@@ -1,0 +1,38 @@
+String estados[N]=([N] "sin atender");
+chan llegue(int i);
+chan iniciarTimer[N];
+chan atender(int i);
+
+
+Process Persona[i:1..N]{
+  send iniciarTimer[i];
+  send atender(i);
+  receive atencion(i);
+
+}
+
+
+
+Process Empleado[i:1..2]{
+  while(true){
+      receive atender(i);
+      if(estado[i]=="sin atender"){
+        //lo atiende
+        estado[i]=="atendido";
+        send atencion(i);
+      }
+  }
+
+
+}
+
+Process Timer[i:1..N]{
+  receive iniciarTimer[i];
+  delay(15);
+  if(estado[i]=="sin atender"){
+    estado[i]:="se fue";
+    send atencion(i);
+  }
+
+
+}

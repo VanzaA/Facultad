@@ -1,0 +1,58 @@
+
+
+Process NiñoC[i:1..N]{
+    Abuela!lapizC(i);
+    Abuela?lapizC(lapiz);
+    delay(10);
+    Abuela!devolverC(lapiz);
+
+}
+
+Process NiñoN[i:1..N]{
+  Abuela!lapizN(i);
+  Abuela?lapizN(lapiz);
+  delay(10);
+  Abuela!devolverN(lapiz);
+
+
+}
+
+Process NiñoA[i:1..N]{
+  Abuela!lapizA(i);
+  Abuela?lapizA(lapiz);
+  delay(10);
+  Abuela!devolverA(lapiz);
+}
+
+Process Abuela[i:1..N]{
+    int negros:=15;
+    int colores:=10;
+    while(true){
+
+        if(colores>0;NiñoC[*]?lapizC(i))->
+            colores--;
+            NiñoC!lapizC(lapiz);
+        if(negros>0;NiñoN[*]?lapizN(i))->
+          negros--;
+          NiñoN!lapizN(lapiz);
+        if(negros>0 and colores>0;NiñoA[*]?lapizA(lapiz))->
+          if(negros>colores){
+            negros--;
+            NiñoA!lapizA(lapiz);
+          }else{
+              colores--;
+              NiñoA!lapizA(lapiz)
+          }
+        if(NiñoN[*]?devolverN(lapiz))->
+            negros++;
+        if(NiñoN[*]?devolverC(lapiz))->
+            colores++;
+        if(NiñoA[*]?devolverA(lapiz))->
+            if(lapiz=="negro"){
+              negros++;
+            }else
+              colores++;
+    }
+
+
+}

@@ -1,0 +1,42 @@
+Resolver este ejercicio con PMS o ADA. En un banco se tiene un sistema que administra el uso de una sala
+de reuniones por parte de N clientes. Los clientes se clasifican en Habutyales y Temporales. La sala puede
+ser usada por un único cliente a la vez, y cuando está libre se debe determinar a quién permitirle su uso dando
+prioridad a los clientes Habituales. Dentro de cada clase de cliente se debe respetar el orden de
+llegada. NOta: suponga que existe una función Tipo() que le indica al cliente de que tipo es.
+
+TASK SALA is
+  ENTRY usarH();
+  ENTRY usarT();
+  ENTRY liberar();
+end SALA;
+
+TASK TYPE Cliente;
+
+TASK BODY Cliente is
+  string tipo;
+  tipo = Tipo();
+  if (tipo =="Habituales") then
+      Sala.usarH();
+  else
+  Sala.usarT();
+  //usa sala
+  Sala.liberar()
+end Cliente;
+
+TASK BODY Sala is
+    boolean libre = false;
+    loop
+        SELECT when (not libre) => ACCEPT liberar() do
+                      libre=true;
+                end liberar;
+        OR  when(libre) => ACCEPT usarH() do
+                libre=false;
+            end usarH;
+        OR   when (libre)&&(usarH'count==0) => ACCEPT usarT()do
+                libre=false;
+              end usarT;
+            end SELECT;
+        end SELECT;
+
+    end loop;
+end;

@@ -1,0 +1,22 @@
+
+Se quiere modelar la cola de un banco que atiende un solo empleado, los clientes llegan
+y si esperan más de 10 minutos se retiran
+
+TASK empleado IS
+  ENTRY llegue();
+END empleado;
+
+TASK TYPE persona;
+TASK BODY persona is BEGIN
+  SELECT
+        empleado.llegue();
+  OR DELAY 10;
+END persona;
+
+TASK BODY empleado is
+  LOOP
+    SELECT ACCEPT llegue() DO
+        delay();//atender
+      END llegue;
+    END LOOP;
+  end empleado;

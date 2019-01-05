@@ -1,0 +1,17 @@
+Process Empleado{
+}
+
+Process Persona[i:1.N]{
+  Intermediario!llegue(i);
+
+}
+
+Process Intermediario{
+  Queue cola;
+  while(true){
+    If(Persona[*]?llegue(i))->
+      cola.push(i);
+    if()
+
+  }
+}

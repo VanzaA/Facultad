@@ -1,0 +1,126 @@
+Suponga que existen N usuarios que deben ejecutar su programa, para esto comparten K
+procesadores.
+Los usuarios solicitan un procesador al administrador. Una vez que el administrador les
+entregó el número de procesador, el usuario le da su programa al procesador que le fue
+asignado. Luego el usuario espera a que:
+• El procesador le avise si hubo algún error en una línea de código con lo cual el
+usuario arregla el programa y se lo vuelve a entregar al procesador, es decir
+queda nuevamente en la cola de programas a ejecutar por su procesador. El
+usuario no termina hasta que el procesador haya ejecutado su programa
+correctamente (sin errores).
+• El procesador le avise que su programa termino, con lo cual termina su
+ejecución.
+El administrador tomará los pedidos de procesador hechos por los usuarios y balanceara
+la carga de programas que tiene cada procesador, de esta forma le entregará al usuario
+un número de procesador.
+El procesador ejecutará un Round-Robin de los programas listos a ejecutar. Cada
+programa es ejecutado línea por línea por medio de la función EJECUCIÓN la cual
+devuelve:
+• 1 error en la ejecución.
+• 2 normal.
+• 3 fin de programa.
+NOTA: Suponga que existe también la función LineaSiguiente que dado un programa
+devuelve la línea a ser ejecutada. Maximice la concurrencia en la solución.
+
+procedure p5
+
+
+
+task type usuario is
+  ENTRY recibir_id(id: int IN);
+  ENTRY recibirPrograma(programa: in string, resultado: in integer);
+end usuario;
+
+task body usuario is
+  id: int;
+  numP: int;
+  programa: string;
+  resultado: int;
+begin
+    ACCEPT recibir_id(id: IN integer);
+    admin.pedirProcesador(numP);
+    administradorProcess[numP].entregarPrograma(programa, resultado);
+    ACCEPT recibirPrograma(programa: in string, resultado in integer);
+    while(resultado == 1){
+        // corregir programa
+        administradorProcess[numP].entregarPrograma(programa);
+        ACCEPT recibirPrograma(programa: IN string, resultado: in integer) is
+    }
+end usuario;
+
+task type procesador is
+  ENTRY ejecutar(programa: IN string, id: IN integer);
+end procesador;
+
+task body procesador is
+    resultado: integer;
+begin
+  loop
+      ACCEPT ejecutar(programa: In string, id: in integer, idAdmin: in integer);
+      resultado = programa.ejecucion(programa.LineaSiguiente());
+      if(resultado == 2){
+        administradorProcess[idAdmin].entregarPrograma(programa);
+      }else{
+        usuarios[id].recibirPrograma(programa, resultado);
+      }
+
+  end loop;
+
+
+
+task type admin is
+    ENTRY pedirProcesador(numP: int OUT);
+end admin;
+
+task body admin is
+  cantProgramas = array[1..K] of integer;
+  cantMin: integer =999;
+  processMin: int = 0;
+begin
+  for(int i:=1; i<=K; i++){
+    cantProgramas[i] = 0;
+  }
+  loop
+    ACCEPT pedirProcesador(numP: out integer) is
+          for(int i:=1; i<=K; i++){
+              if(cantProgramas[i]<cantMin){
+                cantMin:= cantProgramas[i];
+                processMin:=i;
+              }
+          }
+          cantProgramas[processMin]++;
+          numP:=processMin;
+        end pedirProcesador;
+
+  end loop;
+end admin;
+
+task type administradorProcess is
+    ENTRY entregarPrograma(programa: IN string, procesador: IN integer);
+end administradorProcess;
+
+Task body administradorProcess is
+    colaProgramas = array[1..N] of string;
+    administradorProcessid: integer;
+begin
+    administradorProcessid = obtenermiid(); //falta con el programa principal, es una boludé
+    loop
+      SELECT ACCEPT entregarPrograma(programa: IN string, id: in integer) is
+              procesadores[administradorProcessId].ejecutar(programa, id, administradorProcessId);
+            end entregarPrograma;
+    end loop;
+end administradorProcess;
+
+
+
+var
+procesadores = array[1..K] of procesadores;
+usuarios = array[1..N] of usuarios;
+adminProcess= array[1..K] of administradorProcess;
+
+
+
+begin
+  for(int i=1; i=<N; i++){
+    usuario[i].recibir_id(i);
+  }

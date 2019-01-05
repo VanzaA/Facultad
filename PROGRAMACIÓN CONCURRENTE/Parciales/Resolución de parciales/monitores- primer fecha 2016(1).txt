@@ -1,0 +1,62 @@
+Se tienen N pacientes en donde hay 3 categorias de pacientes. La categoria 1 se anota con el medico 1. La categoria 2 se anota con el medico 2. La categoria 3 se anota con ambos medicos. Los medicos tienen que atender a los pacientes por orden de llegada. Aclaracion: los medicos no tienen que atender un paciente que ya esta atendido. Maximiza la concurrencia. Los pacientes tienen una funcion que devuelve la categoria, DarCategoria(). 
+
+Process Paciente[p:1..N]
+var int categoria; int medico;
+	categoria= DarCategoria();
+	ColaDeMedico[categoria].encolar(p);
+	Estado[p].dormirPaciente(medico);
+	Atencion[medico].atender();
+
+end Paciente
+
+Process Medico [m:1..2]
+var int estado_act;
+	ColaDeMedico[m].desencolar(p);
+	Estado[p].cambiarEstado(m, estado_act);
+	if (m== estado_act){ //si el medico atendio el paciente 
+		Atencion[m].atender(); 
+	}
+end Medico;
+
+Monitor ColaDeMedico[m:1..2]
+var queue cola_pacientes;
+	Procedure encolar(int p){
+		push(cola_pacientes,p);
+	end encolar;
+	Procedure desencolar(int p){
+		pop(cola_pacientes,p);
+	end desencolar;
+end ColaDeMedicos;
+
+Monitor Estado [e:1..N]
+var int estado=0; // 0 es esperando y 1 es medico 1 atendiendo, 2 es medico 2 atendiendo
+condition paciente;
+	Procedure cambiarEstado(int medico, var int estado_act){
+		if (estado == 0 ){
+			estado=medico; // me quedo con el numero de medico que me esta atendiendo
+			signal(paciente);
+		}
+		estado_act=estado; //
+	end cambiarEstado;
+	Procedure dormirPaciente(var int medico){
+		wait(paciente);
+		medico=estado; // me guardo el medico que me esta atendiendo para sincronizar la atencion
+	end dormirPaciente;
+end Estado;
+
+
+Monitor Atencion[a:1..2]
+var int cant=0;
+condition esperando;
+	Procedure atender(){
+		cant ++;
+		if (cant < 2) {
+			wait(esperando);
+		} else {
+		    delay(random);
+			//atendiendo
+			signal(esperando);
+			cant=0;
+		}	
+	end atender;
+end Atencion;

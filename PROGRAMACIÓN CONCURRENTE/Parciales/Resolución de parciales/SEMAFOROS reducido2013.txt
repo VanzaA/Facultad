@@ -1,0 +1,62 @@
+P resta
+V aumenta
+
+CON 1 se bloquea el semáforo
+CON 0 se desbloquea el semáforo
+
+DUDA: Como arrancar un arreglo de semaforos?
+
+
+	sem mutex_per = 1;
+	sem perifer[1..10] =([1..10]0)
+	sem mutex_cen=0;
+	sem despertarPer=0;
+	int resul;
+	sem resultado=0;
+
+	Process Central:: {
+		int num;
+		int res;
+		While (true){
+			P(mutex_cen); // aca esta dormido para que no entre otro periferico
+			num:=TrabajaProcesoCentral(); // aca llama la funcion para obtener el numero de periferico a llamar.
+			V(despertarPer[num]); // despierta al proceso periferico de ese numero.
+			P(resultado);
+			res= resul; // recibe el resultado del periferico
+
+		}
+
+	}
+
+	Process Periferico[p=1..10]{
+		int cant_p;
+		P(mutex_per); // semaforo para controlar la cantidad de perifericos que entran. se bloquea para que no 				 // pueda entrar otro proceso al mismo tiempo.
+		cant_p ++;	
+		if (cant_p == 10){
+			for (i=1;1 <10; i++){
+				V(perifer[p]); // despierta a todos los perifericos.
+			}	
+		}
+       else
+       	{
+       		V(mutex_per); // habilita el acceso para que entre otro proceso 
+			P(perifer[p]); // y luego se duerme en su posicion del arreglo.
+       	}
+       	While (true){
+       		V(mutex_cen); // se despierta el proceso central aca, ya que este debe esperar a que lleguen todos 				 // los perifericos 
+       		P(despertarPer [p]); // p se corresponde con num cuando el central despierta un proceso periferico.
+       		// trabaja el periferico
+       		resul=	devolverResultado();
+       		V(resultado);
+
+       	}
+       
+       	
+	}
+
+
+
+
+
+
+	

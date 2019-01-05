@@ -1,0 +1,87 @@
+En un centro de genética se debe administrar el uso de 2 maquinas secuenciadoras de adn con diferentes
+caracteristicas, donde cada maquina se puede usar por un unico investigador a la vez.
+existen N investigadores que deben secuenciar una muestra de adn cada uno, para esto algunos investigadores
+pueden usar indistintamente cualquiera de las maquinas, y otros pueden usar una de ellas en particular,
+Cada investigador saca turno en cada una de las maquinas que le pueden servir, y espera hasta que le llegue
+el turno en una de ellas, la usa y se retira. Nota: suponga que existe una funcion elegirMaquina()
+que retorna 1,2 o 3 (1 indica que solo debe sacar turno en la maquina 1; 2 indica que debe sacar
+turno en maquina 2, 3 indica que debe sacar turno en ambas maquinas)
+
+Process investigador[i:1..N]{
+    miTurno = elegirMaquina();
+    if (miTurno <> 3){
+      Cola[i].encolar(i);
+    }else{
+      Cola[1].encolar(i);
+      Cola[2].encolar
+    }
+    Estado[i].esperar();
+    //usa la maquina
+    Estado[i].entregar_maquina();
+    }
+
+
+
+Process Maquina[m:1..2]{
+  int investigador;
+  boolean estado_act;
+  while(true){
+      estado_act=false;
+      Cola[m].atender(investigador);
+      //lo atiende
+      Estado[investigador].cambiar(estado_act);
+      if(estado_act){
+        Estado[investigador].esperar_maquina();
+
+      }
+  }
+}
+
+Monitor Cola[c:1..2]{
+  Queue cola;
+  cond esperar_inv;
+
+  Procedure encolar(int i){
+      cola.push(i);
+      signal(esperar_inv);
+  }
+
+  Procedure atender(var int investigador){
+      if(empty(cola)){
+        wait(esperar_inv);
+      }
+      investigador:=cola.pop();
+  }
+
+  Monitor Estado[e:1..N]{
+    string estado="esperando";
+    cond esperar;
+
+    Procedure esperar(){
+      if(estado="esperando"){
+        wait(esperar)
+      }
+    }
+
+    Procedure cambiar(var boolean estado_act){
+        if(estado = "esperando"){
+            estado:= usando;
+            signal(esperar);
+            estado_act := true;
+        }
+    }
+
+    Procedure esperar_maquina(){
+      if(estado=="usando"){
+        wait(esperar);
+      }
+    }
+
+    Procedure entregar_maquina(){
+      estado:="se fue";
+      signal(esperar);
+    }
+
+
+  }
+}

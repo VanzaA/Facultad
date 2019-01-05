@@ -1,0 +1,64 @@
+Resolver   el   funcionamiento   en   una   empresa   de   genética.   Hay   N   clientes   que
+sucesivamente envían secuencias de ADN a la empresa para que sean analizadas y esperan
+los resultados para poder envían otra secuencia a analizar. Para resolver estos análisis la
+empresa cuenta con 2 servidores que van alternando su uso para no exigirlos de más (en
+todo momento uno está trabajando y los otros dos descansando); cada 8 horas cambia en
+servidor con el que se trabaja. El servidor que está trabajando, toma un pedido (de a uno
+de  acuerdo  al  orden  de  llegada  de  los  mismos),  lo  resuelve  y  devuelve  el  resultado  al
+cliente  correspondiente;  si  al  terminar  ya  han  pasado  las  8  horas  despierta  al  próximo
+servidor y él descansa, sino continúa con el siguiente pedido.
+
+array espero_analisis[1..N] of sem=([N] 0);
+array sem_s[1..2] of sem = ([1] 1, [2] 0);
+Queue pedidos;
+sem cola_libre=1;
+sem timer=0;
+int turno_actual=1;
+sem cambio_turno=0;
+
+Process cliente [i:1..N]{
+  while(true){
+    p(cola_libre);
+    pedidos.push(i);
+    v(cola_libre);
+    v(llego_cliente);
+    p(espero_analisis[i]);
+    //listo
+  }
+}
+
+Process servidor [i:0..1]{
+  int pedido;
+  while(true){
+    P(sem_s[i]);
+    v(timer);
+    while(turno_actual==i){
+        p(llego_cliente)
+        if(turno_actual==i){
+          p(cola_libre);
+          pedido=cola.pop();
+          v(cola_libre);
+          //analizo
+          v(espero_analisis[pedido]);
+        }
+    }
+    }
+    V(sem_s[turno_actual])
+  }
+}
+
+
+Process timer{
+  cant=0;
+  while(true){
+      p(timer);
+      delay(8); //8 horas
+      cant++
+      turno_actual = cant mod 2;
+      v(llego_cliente)
+
+  }
+
+
+
+}

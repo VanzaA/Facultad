@@ -1,0 +1,20 @@
+#include <stdio.h>
+int main(){
+
+ int c;
+ while (getchar(c) != EOF){
+	 if (c == 92){
+	  printf("\\");
+          printf("\\");
+         }
+         if (c == 9)
+          printf("\t");
+         if (c == 10)
+          printf("\n");
+
+  
+  );
+ }
+ return 0;
+}
+

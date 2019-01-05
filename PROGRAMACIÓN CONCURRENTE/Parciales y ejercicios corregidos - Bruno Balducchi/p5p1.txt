@@ -1,0 +1,57 @@
+
+
+TASK puente IS
+  ENTRY entrar_auto();
+  ENTRY entrar_camion();
+  ENTRY entrar_camioneta();
+  ENTRY salir_auto();
+  ENTRY salir_camion();
+  ENTRY salir_camioneta();
+END puente;
+
+TASK TYPE auto;
+TASK TYPE camion;
+TASK TYPE camioneta;
+
+TASK BODY auto is BEGIN
+  puente.entrar_auto();
+  //pasar puente
+  puente.salir_auto();
+END auto;
+
+TASK BODY camioneta is BEGIN
+  puente.entrar_camioneta();
+  //pasar puente
+  puente.salir_camioneta();
+END camioneta;
+
+TASK BODY camion is BEGIN
+  puente.entrar_camion();
+  //pasar puente
+  puente.salir_camion();
+END camion;
+
+
+
+
+
+TASK BODY puente is
+  int cantautos,cantcamioneta,cantcamion:=0;
+  BEGIN
+  LOOP
+    SELECT
+        WHEN (cantautos<3) and (cantcamionetas=0) and (cantcamion =0) => ACCEPT entrar_auto();
+            cantautos++;
+        OR WHEN (cantautos =0) and (cantcamionetas=0) and (cantcamion = 0) => ACCEPT entrar_camion();
+            cantcamion++;
+        OR WHEN (cantautos=0) and (cantcamionetas<2) and (cantcamion = 0) => ACCEPT entrar_camioneta();
+            cantcamioneta++;
+        OR ACCEPT salir_auto();
+          cantautos--;
+        OR ACCEPT salir_camion();
+          cantcamion--;
+        OR ACCEPT salir_camioneta();
+          cantcamioneta--;
+    end SELECT;
+    end LOOP;
+  end PUENTE;

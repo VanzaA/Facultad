@@ -1,0 +1,58 @@
+
+Queue marcos[30];
+Queue vidrios[30];
+sem cola_marco, cola_vidrio=1;
+int cantmarcos=0;
+int cantvidrios=50;
+sem acceso_c, acceso_v=1;
+
+Process Carpintero[i:1..4]{
+  int marco;
+  while(true){
+    p(acceso_c);
+    if(cantmarcos<30){
+      cantmarcos++;
+      marco.hacerMarco();
+      v(acceso_c)
+      p(cola_marco);
+      marcos.push(marco);
+      v(cola_marco);
+    }else{
+      p(colam_llena);
+    }
+  }
+}
+
+Process Vidriero{
+  int vidrio;
+  while(true){
+    p(acceso_v);
+    if(cantvidrios<50){
+      cantvidrios++;
+      vidrio.hacerVidrio();
+      v(acceso_v);
+      p(cola_vidrio);
+      vidrios.push(vidrio)
+      v(cola_vidrio);
+  }else{
+    p(colav_llena);
+  }
+}
+
+}
+
+Process Armador[i:1..2]{
+  int marco, vidrio;
+  while(true){
+    p(cola_marco);
+    marco= marcos.pop();
+    cantmarcos--;
+    v(cola_marco);
+    v(colam_llena);
+    p(cola_vidrio);
+    vidrio=vidrios.pop();
+    cantvidrios--;
+    v(colav_llena);
+    //armarVentana
+  }s
+}

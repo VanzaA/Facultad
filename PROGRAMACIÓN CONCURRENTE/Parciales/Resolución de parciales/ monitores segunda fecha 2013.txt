@@ -1,0 +1,45 @@
+1) Resolver con MONITORES el siguiente problema. En un Crucero por el Mediterráneo hay 200 personas que deben subir al barco por medio de 10 lanchas con 20 lugares cada una. Cada persona sube a la lancha que le corresponde. Cuando en una lancha han subido sus 20 personas durante 5 minutos navega hasta el barco. Recién cuando han llegado las 10 lanchas al barco se les permite a las 200 personas subir al barco. 
+Nota: suponga que cada persona llama a la función int NúmeroDeLancha () que le devuelve un valor entre 0 y 9 indicando la lancha a la que debe subir. Maximizar la concurrencia.
+
+Process Persona [p:1..200]{
+var 
+ int numero;
+ numero= NumeroDeLancha();
+ Lancha[numero].formarLancha();
+
+ //subir al barco
+
+}
+Monitor Lancha [lan:0..9]
+var int cant_personas=0;
+condition esperar_personas;
+	Procedure formarLancha(){
+		cant_personas ++;
+		if (cant_personas < 20){
+			wait(esperar_personas);
+		}else{
+			signal_all(esperar_personas);
+			delay(5);
+			// navega 5 minutos 
+			Barco.esperarLancha();
+		}
+		
+	}
+
+end Lancha;
+
+Monitor Barco
+var int cant_lanchas=0;
+condition esperar_lanchas;
+	Procedure esperarLancha(){
+		cant_lanchas++;
+		if (cant_lanchas < 10){
+			wait(esperar_lanchas);
+		}
+		else {
+			signal_all(esperar_lanchas);
+		}
+	}
+
+
+end Barco;

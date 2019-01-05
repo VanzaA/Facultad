@@ -1,0 +1,74 @@
+Se debe controlar el acceso a una base de datos. Existen A procesos de Tipo 1, B
+procesos de Tipo 2 y C procesos de Tipo 3 que trabajan indefinidamente de la siguiente
+manera:
+• Proceso Tipo 1: intenta escribir, si no lo logro en 2 minutos, espera 5 minutos y
+vuelve a intentarlo.
+• Proceso Tipo 2: intenta escribir, si no lo logra en 5 minutos, intenta leer, si no lo
+logra en 5 minutos vuelve a comenzar.
+• Proceso Tipo 3: intenta leer, si no puede inmediatamente entonces espera hasta
+poder escribir.
+Un proceso que quiera escribir podrá acceder si no hay ningún otro proceso en la base de
+datos, al acceder escribe y avisa que termino de escribir. Un proceso que quiera leer
+podrá acceder si no hay procesos que escriban, al acceder lee y avisa que termino de
+leer. Siempre se le debe dar prioridad al pedido de acceso para escribir sobre el pedido
+de acceso para leer.
+
+
+Task BD
+	ENTRY escribir(datos:IN string);
+	ENTRY leer(datos:OUT string);
+	ENTRY liberar();
+end BD;
+
+TASK TYPE PROCESS1;
+TASK BODY  is
+begin
+	LOOP
+		SELECT
+			bd.escribir(datos)
+			// ESCRIBE
+		OR DELAY 2;
+			DELAY 5;
+	end LOOP;
+end PROCESS1;
+
+TASK TYPE PROCESS2;
+TASK BODY PROCESS2
+	LOOP
+		SELECT bd.escribir(datos)
+					//ESCRIBE
+		OR DELAY 5
+			SELECT bd.leer(datos);
+						// LEE
+						bd.liberar();
+			OR DELAY 5;
+	end LOOP;
+end PROCESS2;
+
+TASK TYPE PROCESS3;
+TASK BODY PROCESS3
+	SELECT bd.leer()
+	      // lee
+				bd.liberar()
+	OR bd.escribir();
+end PROCESS3;
+
+TASK BODY BD
+	cant: int;
+	begin
+		cant:=0;
+		LOOP
+			SELECT
+					WHEN (cant=0) => ACCEPT escribir(datos) is
+										//escribe
+									end escribir;
+					OR  ACCEPT leer(datos) is
+								cant++;
+						END leer;
+					OR	ACCEPT liberar() is
+							cant--;
+						end liberar;
+			end SELECT;
+		end LOOP;
+	end;
+end BODY;

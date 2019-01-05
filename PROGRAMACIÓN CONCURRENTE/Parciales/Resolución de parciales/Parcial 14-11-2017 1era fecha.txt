@@ -1,0 +1,41 @@
+En un sistema para acreditar carreras universitarias hay UN servidor que atiende pedidos de U usuarios de a uno a la vez y de acuerdo al orden en que se hacen los pedidos.
+Cada usuario trabaja en el documento a presentar, y luego se lo envía al servidor, espera la respuesta del mismo que le indica si está todo bien o hay algún ok. Mientras haya algún ok vuelve a trabajar con el documento y a enviarlo al servidor. Cuando el servidor le responde que está todo bien el usuario se retira. Cuando un usuario envía un pedido espera a lo sumo 4 minutos a que sea recibido por el servidor, pasado ese tiempo espera un minuto y vuelve a intentarlo (usando el mismo documento).
+
+TASK Servidor IS
+
+	entry pedido(doc IN: string, ok OUT: string);
+
+TASK BODY Servidor IS
+
+	loop
+		ACCEPT pedido(doc IN: string, ok OUT: string);
+			if (doc.corregir()) { true => ok, false => no ok (error)
+				ok:= true;
+			} else {
+				ok:= false;
+			}
+		end pedido;
+	end loop;
+
+
+end Servidor;
+
+
+
+TASK Type Usuario IS
+TASK BODY Usuario IS 
+
+string documento;
+boolean ok = false;
+
+while (!ok) {
+	
+	SELECT Servidor.pedido(documento, ok);
+	OR 
+		delay 4;
+	delay 1;
+}
+
+
+
+end Usuario;

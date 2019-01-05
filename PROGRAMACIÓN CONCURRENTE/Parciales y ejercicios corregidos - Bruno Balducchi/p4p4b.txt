@@ -1,0 +1,22 @@
+chan llegue(int i);
+chan aviso( int i);
+Process Corredor[i:1..C]{
+    send llegue(i);
+    if(i==1){
+      for(int i:=0;i<C;i++){
+        receive llegue(i)
+      }
+      send aviso(i);
+    }
+    receive listo(i);
+    /correr
+
+}
+
+Process Portero{
+    receive aviso(i);
+    for(int i:=0;i<C;i++){
+      send listo(i);
+    }
+
+}

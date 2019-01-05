@@ -1,0 +1,61 @@
+  En un centro de oftalmología hay 2 médicos con diferentes especialidades. Existen N pacientes que
+  deben ser atendidos, para esto algunos de los pacientes pueden ser atendidos indistintamente por cualquiera
+  de los medicos, y otros sólo por uno de los médicos en particular. Cada paciente saca turno con cada uno de
+  los médicos que lo pueden atender, y espera hasta que le llegue el turno con uno de ellos, espera a
+  que termine de atenderlo y se retira.
+  Nota: suponga que existe una función ElegirMédico() que returna 1,2 o 3(1 indica que sólo debe
+  sacar turno con el médico 1; 2 indica que sólo debe sacar turno con el Médico 2; 3 indica que debe
+  sacar turno con ambos).
+
+
+Array medico_paciente[1..N] of integer;
+array cola_medico[1..2] of queue;
+sem cola1_libre, cola2_libre;
+sem llegue=0;
+Array espero_atencion[1..N] of sem=([N] 0);
+array atencion[1..2] of sem=([2] 0);
+
+
+Process paciente[i:1..N]{
+    medico_paciente[i] = ElegirMedico();
+    if(medico_paciente[i]==1){
+      p(cola1_libre);
+      cola_medico[1].push(i);
+      v(cola1_libre);
+    }else{
+      if(medico_paciente[i]==2){
+        p(cola2_libre);
+        cola_medico[2].push(i);
+        v(cola1_libre);
+      }else{
+        p(cola1_libre);
+        cola_medico[1].push(i);
+        v(cola1_libre);
+        p(cola2_libre);
+        cola_medico[2].push(i);
+        v(cola1_libre);
+      }
+      v(llegue);
+      p(espero_atencion[i]);
+
+    }
+
+}
+
+Process Medico[m:1..2]{
+    while(true){
+      p(atencion[m]);
+
+
+    }
+
+}
+
+Process Coordinador{
+  while(true){
+    p(llegue);
+    p(cola_libre);
+    int p=cola.pop();
+    v(cola_libre);
+
+}

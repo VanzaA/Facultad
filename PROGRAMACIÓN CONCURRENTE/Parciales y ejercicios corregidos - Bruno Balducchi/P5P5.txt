@@ -1,0 +1,77 @@
+Se dispone de un sistema compuesto por 1 central y 2 procesos. Los procesos envían
+señales a la central. La central comienza su ejecución tomando una señal del proceso 1,
+luego toma aleatoriamente señales de cualquiera de los dos indefinidamente. Al recibir
+una señal de proceso 2, recibe señales del mismo proceso durante 3 minutos.
+El proceso 1 envía una señal que es considerada vieja (se deshecha) si en 2 minutos no
+fue recibida.
+El proceso 2 envía una señal, si no es recibida en ese instante espera 1 minuto y vuelve a
+mandarla (no se deshecha).
+
+task central is
+  entry recibir_señalp1();
+  entry recibir_señalp2();
+  entry tiempo();
+end central;
+
+task type timer is
+    ENTRY arrancar();
+end timer;
+
+TASK body timer is
+begin
+  loop
+    ACCEPT arrancar();
+    DELAY 3;
+    central.tiempo();
+  end loop;
+end;
+
+
+task body timer is
+
+
+task type p1;
+task body p1 is
+begin
+    loop
+      // genera señal
+      SELECT
+          central.recibir_señalp1();
+      OR
+        DELAY 2;
+
+    end loop;
+end;
+
+task type p2;
+task body p2 is
+begin
+   //genera señal
+    LOOP
+
+        SELECT
+          central.recibir_señalp2();
+          //genera señal
+        ELse
+          DELAY(1);
+      END SELECT;
+    END LOOP;
+end;
+
+TASK BODY central is
+    timer: boolean = false;
+begin
+  ACCEPT recibir_señalp1();
+  LOOP
+      SELECT ACCEPT recibir_señalp1();
+      OR ACCEPT recibir_señalp2();
+          timer.iniciar();
+          while(!timer){
+              SELECT ACCEPT tiempo();
+                      timer=true;
+              OR
+                ACCEPT recibir_señalp2();
+          }
+      END SELECT;
+  end LOOP;
+end;

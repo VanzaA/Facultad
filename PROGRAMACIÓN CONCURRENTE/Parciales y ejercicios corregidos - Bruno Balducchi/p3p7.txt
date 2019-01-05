@@ -1,0 +1,48 @@
+
+
+
+Process Alumno[i:1..50]{
+  int nota;
+  int miGrupo;
+  Fila.fila();
+  Jefe.DarNumero(miGrupo);
+  //realizar Practica
+  Grupo[miGrupo].termine(nota);
+
+}
+
+Monitor Fila{
+  int cantAlumnos=0;
+  cond esperar;
+
+  Procedure fila(){
+    cant++;
+    if(cant<50){
+      wait(esperar);
+    }
+    else{
+      signalall();
+    }
+  }
+  Monitor Jefe{
+      int notas=25;
+      Procedure corregir(var int nota){
+        nota:=notas--;
+      }
+
+  }
+
+Monitor Grupo[i:1..25]{
+  int cant=0;
+  cond esperar_compa;
+  int nota;
+Procedure termine(var int nota){
+    cant++;
+    if(cant < 2){
+      wait(esperar_compa);
+    }else{
+      Jefe.corregir(nota);
+      signal(esperar_compa);
+      }
+    }
+}

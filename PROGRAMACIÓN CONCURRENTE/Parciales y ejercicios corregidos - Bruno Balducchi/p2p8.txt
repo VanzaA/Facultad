@@ -1,0 +1,37 @@
+Hay una fábrica con M operarios en donde se deben realizar N tareas (siendo M = Nx5).
+Cada tarea se realiza de a grupos de 5 operarios, ni bien llegan a la fábrica se juntan de a
+5  en  el  orden  en  que  llegaron  y  cuando  se  ha  formado  el  grupo  se  le  da  la  tarea
+correspondiente empezando de la tarea uno hasta la enésima. Una vez que los operarios
+del  grupo  tienen  la  tarea  asignada  producen  elementos  hasta  que  hayan  realizado
+exactamente X entre los operarios del grupo. Una vez que terminaron de producir los X 
+elementos, se juntan los 5 operarios del grupo y se retiran.
+Nota: cada operario puede hacer 0, 1 o más elementos de una tarea. El tiempo que cada
+operario tarda en hacer cada elemento es diferente y random. Maximice la concurrencia.
+
+
+int cant=0;
+sem llegue=1;
+sem esperando_grupo=0;
+Array[] tareas(1 to M) of integer;
+Array[] tarea_asignada(1 to N) of integer;
+int tarea=1;
+Array[] comenzar(1 to N) of sem;
+sem acceso_tarea[N] = ([N] 1);
+
+Process Operario[i:1..M]{
+      p(llegue);
+      cant++;
+      tarea_asignada[i]=tarea;
+      if(cant<5){
+        v(llegue);
+        p(esperando_grupo);
+      }else{
+        tarea++;
+        cant=0;
+        for(int k=0;k<5;k++){
+          v(esperando_grupo)
+        }
+      v(llegue);
+      p(comenzar[i]);
+      p(acceso_tarea[tarea_asignada[i]]);
+}

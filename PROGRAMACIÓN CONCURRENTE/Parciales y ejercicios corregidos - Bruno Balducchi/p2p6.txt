@@ -1,0 +1,64 @@
+sem llegue=0;
+int cant=0;
+array cant_tareas[E] of integer;
+sem tomar_tarea=1;
+int tareas = T;
+sem esperar_compa=0;
+int termine=0;
+Process Empleado[i:1..E]{
+    cant++;
+    int tareas=T;
+    int mi_tarea;
+    if(cant<E){
+      p(llegue);
+    }
+    else{
+      for(int k:=0;i<E;i++){
+        v(llegue);
+      }
+    }
+    while(tareas>0){
+      p(tomar_tarea);
+      mi_tarea= tareas;
+      tareas--;
+      v(tomar_tarea);
+      mi_tarea.realizar();
+      cant_tareas[i]++;
+    }
+    termine++;
+    if(termine<E){
+        p(esperar_compa);
+    }
+    else{
+      for(int k=0;k<E;k++){
+        v(esperar_compa);
+      }
+      v(avisar);
+    }
+    p(premio);
+    //irse
+  }
+
+Process premio{
+    p(avisar);
+    int emp_max=-1;
+    int cant_max=-1;
+    for(int i=0;i<cant_tareas.lenght();i++){
+      if(cant_max<cant_tareas[i]){
+          cant_max=cant_tareas[i];
+          emp_max=i;
+      }
+    }
+    dar_premio(i);
+    for(int k=0;k<E;k++){
+        v(premio);
+          }
+}
+
+
+
+
+
+
+
+}

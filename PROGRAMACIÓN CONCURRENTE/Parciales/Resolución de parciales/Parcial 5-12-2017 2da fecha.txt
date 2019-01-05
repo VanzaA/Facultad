@@ -1,0 +1,42 @@
+En un campo dividido en 4 secciones (Norte, Sur, Este y Oeste) se deben hacer rollos de pasto, para lo cual se cuenta con 4 máquinas enrolladoras y un coordinador. El coordinador indica a cada máquina la sección en la cual le toca trabajar (cada máquina va a una sección diferente) y al final el coordinador imprime la cantidad total de rollos realizados en todo el campo.
+Nota: maximizar la concurrencia.
+
+TASK Coordinador IS
+	entry darSeccion(seccion:IN OUT string); //para darle la seccion a cada máquina
+	entry termine(cantRollos:IN integer); //para obtener la cantidad de rollos realizados en cada seccion.
+
+end Coordinador;
+
+TASK BODY Coordinador IS
+	total:= 0;
+
+	for(int i=1; i<=4; i++) {
+		SELECT
+			ACCEPT MaquinaEnrolladora.darSeccion(seccion IN OUT string);
+				seccion = DarSeccion();
+			end darSeccion;
+		end SELECT;
+	}
+
+	for(int i=1; i<=4; i++) {
+		SELECT
+			ACCEPT MaquinaEnrolladora.termine(cantRollos IN integer);
+				total:= total + cantRollos;
+			end termine;
+		end SELECT;
+	}
+	print(total);
+
+TASK MaquinaEnrrolladora
+
+TASK BODY MaquinaEnrrolladora IS
+	cantRollos:= 0;
+
+	Coordinador.darSeccion(seccion: INT OUT string);
+	//trabaja con la seccion
+	delay(random);
+	cantRollos:= CantidadDeRollosHechos();
+	Coordinador.termine(cantRollos);
+
+end MaquinaEnrrolladora;
+

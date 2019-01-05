@@ -1,0 +1,26 @@
+Resolver con semaforos. En un parque ecologico hay un puente colgante por el cual
+ puede pasar 1 persona a la vez. Hay N personas que quieren pasar de acuerdo al orden de llegada,
+y un guardia que se encarga de chequear los datos de la proxima persona que va a cruzar y ponerle
+ los arneses de seguridad. Maximizar la concurrencia
+
+sem cola_libre=1;
+Queue colaPersonas[];
+sem llegue=1;
+sem esperar_arnes=0;
+ Process Persona [i:1..N]{
+    p(cola_libre);
+    cola.push(i);
+    v(cola_libre);
+    p(esperar_arnes);
+    //cruza puente
+ }
+
+ Process Guardia{
+    int persona;
+    while(true){
+      p(cola_libre);
+      persona = cola.pop()
+      v(cola_libre);
+      persona.arnes();
+      v(esperar_arnes);
+    }

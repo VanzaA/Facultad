@@ -1,0 +1,41 @@
+chan pedir(int i);
+chan pedido(int pedido);
+
+Process Cliente[i:1..N]{
+  send pedir(i);
+  receive pedido(pedido);
+}
+
+Process Administrador{
+
+    while(true){
+        receive vendedor_libre(v);
+        (if !empty(pedir)){
+            receive pedir(i);
+            send pedido_vendedor(i);
+        }
+        else
+            send pedido_vendedor(-1);
+    }
+}
+
+Process Vendedor[i:1..3]{
+    while(true){
+      send vendedor_libre(i);
+      receive pedido_vendedor(ped);
+      if(ped != -1){
+        send pedido_cocinero(ped);
+      }else
+          delay(3);
+    }
+
+}
+
+Process Cocinero[i:1..2]{
+    while(true){
+        receive pedido_cocinero(ped);
+        //cocinar
+        send pedido(ped);
+    }
+
+}

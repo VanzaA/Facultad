@@ -1,0 +1,73 @@
+En una facultad existen A alumnos los cuales quieren entrevistarse con el jefe de la oficina
+En una facultad existen A alumnos los cuales quieren entrevistarse con el jefe de la oficina
+de alumnos. El jefe de dicha oficina atiende al alumno que más entrevistas pidió. En la entrevista
+el alumno le entrega su problema y el jefe lo analiza y le informa la solucion.
+Nota: realizar el ejercicio con ADA. Maximizar la concurrencia. Los alumnos se entrevistan
+una única vez. El jefe de la oficina está continuamente atendiendo gente.
+
+procedure entrevistas is
+Task Jefe is
+    ENTRY entrevistar(alumno IN integer);
+end Jefe;
+
+
+Task type Alumno is
+  ENTRY chau();
+  ENTRY entrevista();
+end;
+TASK BODY Alumno is
+
+    ACCEPT recibirid(id IN integer);
+    boolean atendido=false;
+    while(!atendido){
+      SELECT ACCEPT entrevista()is
+          atendido=true;
+      ELSE
+          Admin.pedir_entrevista(id);
+      }
+    }
+end alumno;
+
+Task type Admin is
+    ENTRY pedir_entrevista(Alumno IN integer, atendido OUT boolean);
+    ENTRY estoy_libre();
+end;
+Task BODY admin is
+    array cant_ped[1..A]of integer=([N] 0);
+
+    loop
+          SELECT ACCEPT estoy_libre(alumno OUT integer) is
+              int cantmax=-1;
+              int alumno;
+              for(int i=1;i<=A;i++){
+                if(cantmax>cant_ped[i]){
+                  cantmax:=cant_ped[i];
+                  alumno:=i;
+                }
+                cant_ped[i]:=0;
+              }
+            end estoy_libre;
+          OR
+                when (estoy_libre()'count == 0)-> ACCEPT pedir_entrevista(id IN integer) is
+                    cant_ped[id]++;
+                  end pedir_entrevista;
+          end SELECT;
+    }
+
+
+Task BODY Jefe is
+    while(true){
+      Admin.estoy_libre(alumno);
+      Alumno[alumno].entrevista();
+      //lo entrevista
+
+    }
+
+var
+  Array alumnos[1..A] of Alumno;
+begin
+    for(int i=1; i<=N;i++){
+        Alumno.recibirid(i);
+    }
+end;
+end entrevistas;

@@ -1,0 +1,85 @@
+
+//CORREGIR
+hay que cambiar en vez de hacer un intermediario solo, hay que hacer 3 , uno por cada color.
+
+  1)El procesamiento de una imagen se realiza de la siguiente manera: primero actuan los procesos
+  receptores de imagenes. Cada receptor trabaja de manera continua recibiendo imagenes; a cada imagen
+  que recibe le aplica un proceso de segmentacion y a partir de ello determina el color del fondo. Si el color
+  del fondo es rojo, entonces la imagen es enviada a un proceso reconocedorRojo, si la imagentiene fondo azul
+  se envia a un proceso reconocedorAzul y por ultimo si la imagen tiene fondo verde se envía al proceso
+ reconocedor verde. Una vez que alguno de los procesos reconocedores reciben la imagen debe determinar
+  e imprimir la cantidad  de circulos, cuadradados y triangulos de la misma. Para realizar esta cuenta
+  existe el proceso círculo,  el proceso cuadrado y el proceso rectangulo, los cuales cuentan la
+   cantidad de circulos, cuadrados y rectangulos  de la imagen.
+  Con PMS, maximizar la concurrencia y evitar procesos ociosos. Existen p procesos receptores.
+  
+Process Receptor[i:1..P]{
+  while(true){
+      string imagen := recibirImagen();
+      //proceso de segmentacion
+      if(imagen = "rojo"){
+        Intermediario!imagen_r(imagen);
+      }else{
+            if(imagen="azul"){
+              Intermediario!imagen_a(imagen);
+            }else{
+                  Intermediario!imagen_v(imagen);
+            }
+
+          }
+      }
+
+}
+
+Process Intermedio{
+    Queue cola_r, cola_v, cola_a;
+
+    while(true){
+        if Receptor[*]?imagen_r(imagen) ->
+              cola_r.push(imagen);
+        *  Receptor[*]?imagen_v(imagen) ->
+              cola_v.push(imagen);
+        *  Receptor[*]?imagen_a(imagen) ->
+              cola_a.push(imagen);
+        * (not empty(cola_r)) reconocedorRojo?libre_r() ->
+              reconocedorRojo!imagen_r(cola_r.pop);
+        * (not empty(cola_v)) reconocedorVerde?libre_v() ->
+              reconocedorVerde!imagen_v(cola_v.pop());
+        * (not empty(cola_a)) reconocedorAzul?libre_a() ->
+              reconocedorAzul!imagen_a(cola_a.pop());
+    }
+}
+
+Process reconocedorRojo{
+  while(true){
+    Intermediario!libre_r();
+    Intermediario?imagen_r(imagen);
+    println(imagen.circulo());
+    println(imagen.cuadrado());
+    println(imagen.rectangulo());
+  }
+
+}
+
+Process reconocedorAzul{
+  while(true){
+      Intermediario!libre_a();
+      Intermediario?imagen_a(imagen);
+      println(imagen.circulo());
+      println(imagen.cuadrado());
+      println(imagen.rectangulo());
+
+  }
+
+}
+
+Process reconocedorVerde{
+  while(true){
+      Intermediario!libre_v();
+      Intermediario?imagen_v(imagen);
+      println(imagen.circulo());
+      println(imagen.cuadrado());
+      println(imagen.rectangulo());
+
+  }
+}

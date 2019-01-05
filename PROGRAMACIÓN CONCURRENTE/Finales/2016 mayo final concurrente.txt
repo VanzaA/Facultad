@@ -1,0 +1,5 @@
+1- Barreras Simétricas, butterfy Barrier
+2- Ordenación de un arreglo con 2 procesos y pasaje de mensajes y con N procesos.
+3 - Imagen Matriz N*N en la que hay que calcular el mayor y menor con un algoritmo heartbeat (La diferencia con los demás finales es que los nodos conocen los que tienen en diagonal)
+4- Primitivas múltiples
+5 - SpeedUp, eficiencia, ley de Amdahl y los dos ejercicios que andan dando vueltas uno que preguntaba de dos soluciones cual se comportaba más eficientemente al crecer la cantidad de procesadores y otro para aplicar ley de Amdahl.

@@ -1,0 +1,81 @@
+Resolver con PMA el siguiente problema. En un gimnasio hay tres máquinas
+iguales que pueden ser utilizadas para hacer ejercicio o rehabilitación. Hay E personas
+que quieren usar cualquiera de esas máquinas para hacer ejercicio, y R personas que
+las quieren usar para hacer rehabilitación. Siempre tienen prioridad aquellas que la
+quieran usar para realizar rehabilitación. Cuando una persona toma una máquina la
+usa por 10 minutos y se retira.
+
+queue colaRehabilitacion;
+queue colaEjercicio;
+chan pedirMaquinaEjercicio;
+chan pedirMaquinaRehabilitacion;
+chan hacerRehabilitacion(int);
+chan hacerEjercicio(int);
+chan liberarMaquina[int](int);
+
+
+process Admin:: {
+
+int cant= 0;
+
+	while (true){
+		if (notempty (pedirMaquinaRehabilitacion(id))) {
+			colaRehabilitacion.encolar(id);
+		}
+		* (notempty (pedirMaquinaEjercicio(id))) {
+			colaEjercicio.encolar(id);
+		}
+		* (notempty (colaRehabilitacion) and (cant < 3)) {
+			send -> hacerRehabilitacion(colaRehabilitacion.desencolar());
+			cant++;
+		}
+		* (notempty (colaEjercicio) and (cant < 3) and empty(colaRehabilitacion) and empty(pedirMaquinaRehabilitacion)) {
+			send -> hacerEjercicio(colaEjercicio.desencolar());
+			cant++;
+		}
+		* (notEmpty (liberarMaquina())){
+			receive -> liberarMaquina[id](id_maquina);
+			cant--;
+		}
+	}
+}
+
+process Maquina: [id=1..3]{
+	
+	while (true){
+		if (notempty (hacerRehabilitacion)) {
+			receive -> hacerRehabilitacion(id);
+			// la persona hace la rehabilitacion;
+		} 
+		* (notempty (hacerEjercicio)) {
+			receive -> hacerEjercicio(id);
+			// la persona hace ejercicio
+		}
+	}
+}
+
+
+process PersonasEjercicio: [id=1..E]{
+
+	send chan pedirMaquinaEjercicio[id]();
+	//espera que le asignen la maquina
+	receive pedirMaquinaEjercicio[id](id_maquina);
+	//usa la maquina
+	delay(10);
+	send liberarMaquina[id](id_maquina);
+	// se retira
+
+}
+
+
+process PersonasRehabilitacion: [id=1..R]{
+
+	send chan pedirMaquinaRehabilitacion[id]();
+	//espera que le asignen la maquina
+	receive pedirMaquinaRehabilitacion[id](id_maquina);
+	// usa la maquina
+	delay(10);
+	send liberarMaquina[id](id_maquina);
+	// se retira
+
+}

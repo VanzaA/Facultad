@@ -1,0 +1,49 @@
+Un sistema de software está compuesto por un proceso CENTRAL y un conjunto de los procesos periféricos donde
+cada uno de ellos realiza una determinada operación especial (cuyo resultado es un valor entero)
+El proceso CENTRAL debe esperar a que todos los procesos periféricos se hayan iniciado para poder
+comenzar. Una vez que el proceso central comenzó a trabajar, cada vez qye necesita realizar alguna de las
+10 operaciones especiales avisa al correspondiente peiferico para que realice el trabajo y espera a que devuelva
+el resultado.
+Nota: suponga que existe una función int TrabajoProcesoCentral() que fsimula el traajo del proceso central
+y devuelve un valor entero entrre 1 y 10, que indica cual de las 10 operaciones debe realizar en ese momento
+
+array resultado[1..10] of integer;
+sem espero_resultado=0;
+array sem_per[1..10] of sem=([10] 0);
+sem esperar_todos=0;
+int cant = 0;
+sem perifericos_listos=0;
+sem llegue=1;
+Process Periferico [i:1..10]{
+    p(llegue);
+    cant++;
+
+    if(cant<10){
+      v(llegue);
+      p(esperar_todos);
+    }else{
+      v(llegue);
+      for (int i=0;i<10;i++){
+        v(esperar_todos);
+      }
+      v(perifericos_listos);
+    }
+    while(true){
+      p(sem_per[i]);
+      //trabaja
+      resultado[i] = trabajoPedido();
+      v(espero_resultado);
+
+    }
+}
+
+Process Central{
+    p(perifericos_listos);
+    while(true){
+      int p = TrabajoProcesoCentral();
+      v(sem_per[p]);
+      p(espero_resultado);
+      resultado[p] = 0; //toma el resultado
+    }
+
+}

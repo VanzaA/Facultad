@@ -1,0 +1,42 @@
+chan personas(int i);
+chan caja[5];
+
+
+Process Cliente[i:1..N]{
+  send personas(i);
+  receive chau(i);
+
+}
+
+Process Administrador{
+  int cajas[5]=([5] 0);
+
+  while(true){
+
+    if(not empty(liberar))->
+        receive liberar(c);
+        caja[c]--;
+    if(not empty(personas))->
+        receive personas(p);
+        cajamin:=99;
+        min:=0;
+        for(int i=0;i<5;i++){
+            if(caja[i]<cajamin){
+              cajamin:=caja[i]
+              min:=i;
+            }
+        }
+        caja[min]++;
+        send caja[min](p);
+  }
+
+
+}
+
+Process Caja [i:1..5]{
+  receive caja[i](p);
+  //atender
+  send liberar(p);
+  send chau(p);
+
+}

@@ -1,0 +1,38 @@
+
+
+Process Empleado[i:1..50]{
+    int miGrupo;
+    miGrupo=Asignador.asignar(i);
+    Grupo[miGrupo].llegue();
+    /verificarPozo
+
+}
+
+
+Monitor Grupo[i:1..10]{
+  int cant=0;
+  cond esperar_compa;
+
+  Procedure llegue(){
+      cant++;
+      if(cant<5){
+        wait(esperar_compa);
+      }
+      else{
+        signal_all(esperar_compa);
+      }
+  }
+
+
+
+}
+
+Monitor Asignador{
+    grupo[1..10] grupos;
+    Procedure asignar(empleado){
+        empleado =grupos.asignarGrupos();
+        return empleado;
+    }
+
+
+}

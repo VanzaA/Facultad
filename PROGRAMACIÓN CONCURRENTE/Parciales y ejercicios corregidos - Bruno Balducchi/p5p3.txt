@@ -1,0 +1,37 @@
+Se debe modelar un buscador para contar la cantidad de veces que aparece un número
+dentro de un vector distribuido entre las N tareas contador. Además existe un
+administrador que decide el número que se desea buscar y se lo envía a los N contadores
+para que lo busquen en la parte del vector que poseen.
+
+
+TASK contador is
+  ENTRY contar(numero:in);
+END contador;
+
+TASK TYPE ADMIN is
+  ENTRY dar_numero(numero: out);
+  ENTRY recibir_resultado(numero: in);
+end ADMIN;
+
+TASK TYPE CONTADOR;
+
+VAR
+  CONTADORES = ARRAY [1..n] OF CONTADOR;
+END VAR;
+
+TASK BODY CONTADOR is
+  LOOP
+      contar()
+
+TASK ADMIN 
+
+
+
+
+
+
+    FOR I IN 2N
+    SELECT
+        ACCEPT DARNUMERO
+    OR
+        ACCEPT RECIBIRRESULTADO

@@ -1,0 +1,74 @@
+En  un  entrenamiento  de  futbol  hay  20  jugadores  que  forman  4  equipos  (cada  jugador
+conoce  el  equipo  al  cual  pertenece  llamando  a  la  función  DarEquipo()).  Cuando  un
+equipo está listo (han llegado los 5 jugadores que lo componen), debe enfrentarse a otro
+equipo que también esté listo (los dos primeros equipos en juntarse juegan en la cancha
+1,  y  los  otros  dos  equipos  juegan  en  la  cancha  2).  Una  vez  que  el  equipo  conoce  la
+cancha  en  la  que  juega,  sus  jugadores  se  dirigen  a  ella.  Cuando  los  10  jugadores  del
+partido  llegaron  a  la  cancha  comienza  el  partido,  juegan  durante  50  minutos,  y  al
+terminar todos los jugadores del partido se retiran (no es necesario que se esperen para
+salir).
+
+Process jugador[i:1..20]{
+  int miEquipo=DarEquipo();
+  int numCancha=Equipo.llegue();
+  Cancha[Equipo[miEquipo].getCancha()].jugar();
+  // se va
+}
+
+Monitor Equipo[i:1..4]{
+  int cantJ=0;
+  cond esperar;
+  int cancha_asignada;
+
+  procedure llegue(){
+    cantJ++;
+    if(cantJ<5){
+      wait(esperar_compa);
+    }else{
+      int numCancha=AsignadorCancha.asignarCancha(i);
+      signal_all(esperar_compa);
+      }
+    }
+
+    procedure setCancha (int cancha){
+      cancha_asignada:= cancha;
+    }
+
+    procedure getCancha (){
+      return cancha_asignada;
+    }
+
+
+}
+
+Monitor AsignadorCancha{
+  int cantEquipos=0;
+  int numCancha=0;
+  cond esperar_equipo;
+  procedure asignarCancha(int equipo){
+    cantEquipos++;
+    if(cantEquipos<2){
+      wait(esperar_equipo);
+    }else{
+      cantEquipos=0;
+      numCancha++;
+      signal_all(esperar_equipo);
+    }
+    Equipo[equipo].setCancha(numCancha);
+  }
+}
+
+Monitor Cancha[i:1..2]{
+  int cantJugadores=0;
+  cond esperar_jugadores;
+
+  procedure jugar(){
+    cantJugadores++;
+    if(cantJugadores<10){
+      wait(esperar_jugadores);
+    }else{
+      signal_all(esperar_jugadores);
+    }
+    delay(50); //ya se juegAAAA
+  }
+}

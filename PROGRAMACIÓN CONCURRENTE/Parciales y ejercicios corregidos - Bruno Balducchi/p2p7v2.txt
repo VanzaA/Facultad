@@ -1,0 +1,53 @@
+Existe una casa de comida rápida que es atendida por 1 empleado
+. Cuando una persona llega se pone en la cola y espera a lo sumo 10 minutos a que el empleado
+lo atienda. Pasado ese tiempo se retira sin realizar la compra.
+
+
+array timer[1..N] of sem=([N] 0);
+array estado[1..N] of string;
+Queue cola;
+sem cola_libre=1;
+array espero_atencion[1..N] of sem=([N] 0);
+array estado_s[1..N] of sem=([N] 1);
+
+Process Persona [i:1..N]{
+  p(cola_libre);
+  cola.push(i);
+  v(cola_libre);
+  v(timer[i]);
+  v(llegue);
+  p(espero_atencion[i]);
+  if(estado[i]="atendido"){
+    //estoy feliz
+  }else
+    //y enojado
+
+}
+
+Process Empleado{
+    while(true){
+      p(llegue);
+      p(cola_libre);
+      p=cola.pop();
+      v(cola_libre);
+      p(estado[p]);
+      if(estado[i]!="se fue"){
+        //lo atiende
+        estado[i]= "atendido";
+        v(espero_atencion[p]);
+        v(estado[p]);
+      }
+    }
+}
+
+
+Process Timer[i:1..N]{
+  p(timer[i]);
+  delay(10);
+  p(estado[p]);
+  if(estado[i]!="atendido"){
+    estado[i]="se fue";
+    v(espero_atencion[i]);
+    v(estado[p]);
+  }
+}

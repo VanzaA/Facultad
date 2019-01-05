@@ -1,0 +1,12 @@
+#include <stdio.h>
+#define mi_macro(t, a, b) {t _z##a##_##b = a; a = b; b = _z##a##_##b;}
+
+int main(){
+
+	int a = 6;
+	int b = 7;
+	int j = mi_macro(#define , a, b);
+	return 0;
+
+
+}

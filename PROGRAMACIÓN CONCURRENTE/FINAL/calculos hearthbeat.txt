@@ -1,0 +1,50 @@
+8 * 16 -52
+
+
+8 4^3 - 20 N^2 + 8N + 4
+
+128 por ronda sin restar los mensajes no enviados
+
+tenemos 8 bordes
+tenemos 4 esquinas
+
+Por cada borde vamos a restar 3 mensajes (8 * 3 = 24)
+Por cada esquina vamos a restar 5 mensajes (4 * 5 = 20)
+Nodos que restamos por ronda = 44
+
+Por ronda tenemos 84 mensajes
+
+Como tenemos N - 1 rondas (3 rondas), 
+
+
+
+
+SACANDO EN FUNCIÓN DE "N"
+
+Total = N*N
+Esquinas = 4
+Bordes = (N-2)*4
+Nodos centricos = Total - Bordes - Esquinas
+
+Esquinas mandan 3 mensajes
+Bordes mandan 5 mensajes
+Nodos centricos 8 mensajes
+
+Ciclos = N-1
+
+Cantidad de mensajes por ciclo:
+(Esquinas * 3) + (Bordes * 5) + (Nodos Céntricos * 8)
+12 + 40 + 32
+
+Cantidad de mensajes total = cantidad de mensajes por ciclo * (Ciclos)
+
+
+
+Probamos con N= 3
+
+4 esquinas
+4 bordes
+1 centrico
+
+12 + 20 + 8 = 40 mensajes por ronda
+80 mensajes en total

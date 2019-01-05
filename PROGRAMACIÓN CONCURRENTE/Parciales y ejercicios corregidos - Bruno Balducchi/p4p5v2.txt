@@ -1,0 +1,46 @@
+Suponga que N personas llegan a la cola de un banco. Una vez que la persona se agrega
+en la cola no espera más de 15 minutos para su atención, si pasado ese tiempo no fue
+atendida se retira. Para atender a las personas existen 2 empleados que van atendiendo
+de a una y por orden de llegada a las personas.
+
+chan cola;
+array espero_atencion[1..N] of chan;
+array timer[1..N] of chan;
+chan llegue;
+array estado[1..N] of chan;
+Process Persona[p:1..N]{
+    send cola(p);
+    send timer[p];
+    receive espero_atencion[p](estado);
+    if(estado=="atendido"){
+      //se va feliz
+    }else
+      // se va rompiendo todo
+}
+
+Process Timer[t:1..N]{
+  receive timer[t];
+  delay (15);
+  send estado[t]("timer");
+}
+
+Process Estado[e:1..N]{
+  receive estado[t](estado);
+  if (estado == "atendido"){
+    send espero_atencion[e]("atendido");
+    receive estado[t]("timer") //espera el timer
+    }else{
+      send espero_atencion[e]("andate");
+      receive estado[p](atendido) //espera el msj del empleado
+    }
+
+  }
+
+}
+Process Empleado [e:1..2]{
+  while(true){
+    receive cola(p);
+    //lo atiende
+    send estado[p]("atendido");
+  }
+}

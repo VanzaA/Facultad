@@ -1,0 +1,53 @@
+sem mutex_pacientes;
+sem mutex_enferma;
+sem mutex_medico;
+sem mutex_cola;
+queue cola;
+array numeros[1..N] = 0;
+prioridad colaP;
+
+
+Process Medico: [m:1..3]{	
+var
+begin
+	P(mutex_medico);
+	P(mutex_colaP);
+	pop(colaP, p);
+	V(mutex_colaP);
+	//atiende al paciente
+	V(mutex_paciente[p]);
+}
+
+Process Enfermera:: {
+var
+begin
+	P(mutex_enfermera);
+	P(mutex_cola);
+	pop(cola,p);
+	V(mutex_cola);
+	// revisa paciente
+	numeros[p] = asignar_numero();
+	V(mutex_pacientes[p]);
+
+}
+
+
+Process Paciente: [p:1..N]{
+var
+int numero;
+begin
+	P(mutex_cola);
+	push(cola,p);
+	V(mutex_cola);
+	V(mutex_enfermera);
+	P(mutex_pacientes[p]);
+
+	numero = numeros[p];
+	P(mutex_colaP);
+	push(colaP, numero, p);
+	V(mutex_colaP);
+	
+	V(mutex_medico);
+	P(mutex_pacientes[p]);
+	//se retira
+}

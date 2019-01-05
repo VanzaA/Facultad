@@ -1,0 +1,24 @@
+Process Empleado[i:1.3]{
+    while(true){
+      Intermediario!estoylibre(i);
+      Intermediario?cliente(i);
+      //atender
+      Cliente[i]!ir(i);
+    }
+}
+
+Process Cliente [i:1..C]{
+    Intermediario!llegue(i);
+    Empleado[*]?ir(i);
+}
+
+Process Intermediario{
+  Queue cola;
+  while(true){
+      if(cola.empty)and(Cliente[*]?llegue(i))->
+          cola.push(i);
+
+      if((!cola.empty)and(Intermediario[*]?estoylibre(i))->
+        Empleado!cliente(cola.pop);
+  }
+}

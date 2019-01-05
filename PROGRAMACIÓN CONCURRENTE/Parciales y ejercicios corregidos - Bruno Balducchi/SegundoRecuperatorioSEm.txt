@@ -1,0 +1,10 @@
+  En una carpinteria se realizan muebles ensamblando 3 partes, existen n1 carpinteros para
+  realizar la parte 1, n2 para realizar la parte 2, n3 para la parte 3 más N carpinteros que se encargan
+  de ensamblar las 3 partes del mueble.
+  Los encargados de ensamblar deben tomar una pieza de cada clase juntar las partes y una vez ensambladas
+  los carpinteros que le dieron la pieza pueden seguir trabajando (no antes).
+  En la carpinteria solo se armaran 30 muebles y no se podrán producir piezas de mas.
+  El armado debe realizarce en forma concurrente solo pueden espperarse entre los carpinteros de un mismo tipo
+  cuando terminan una pieza hasta que los tome un ensablador (es decir puede pensar que los ensambladores toman
+  las piezas de a uno).
+  Todos los procesos deben terminar correctamente no pueden quedar los procesos colgados

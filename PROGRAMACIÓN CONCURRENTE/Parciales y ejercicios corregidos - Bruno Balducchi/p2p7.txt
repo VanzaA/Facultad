@@ -1,0 +1,63 @@
+Queue cola of integer;
+Array[] llegue of sem;
+sem cola=1;
+Array[] estado of string;
+Array[] atendiendo of sem;
+
+
+process Persona[i:1..N]{
+  p(cola);
+  cola.push(i);
+  v(cola);
+  v(cola_llena);
+  v(llegue[i]);
+  p(atendiendo[i]);
+  if(estado[i]=="atendido"){
+    v(atencion[i]);
+    //
+    p(fin_atencion[i]);
+  }else
+    //irse enojado
+
+}
+
+Process Empleado{
+    int cliente;
+  while(true){
+      p(cola_llena);
+      p(cola);
+      cliente := cola.pop();
+      v(cola)
+      p(estado[cliente]);
+      if(estado[cliente]=="esperando"){
+      //atender
+      estado[cliente]:="Atendido";
+
+      v(atendido[cliente]);
+      p(atencion[cliente]);
+      delay(random);
+      v(fin_atencion[cliente]);
+
+      }
+      v(estado[cliente]);
+    }
+
+  }
+
+}
+
+Process Timer[i:1..N]{
+    p(llegue[i]);
+    delay(10);
+    p(estado[i]);
+    if(estado[i]!="atendido")
+      estado[i]:="out";
+      v(atendiendo[i]);
+    }
+    v(estado[i]);
+
+  }
+
+
+
+}

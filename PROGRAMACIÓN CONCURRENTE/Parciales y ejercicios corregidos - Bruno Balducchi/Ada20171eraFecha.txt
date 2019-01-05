@@ -1,0 +1,42 @@
+Resolver con ADA. Un sistema web para reservas de pasajes de micro donde existen N clientes
+que solicitan un pasaje para cierto destino, espera hasta que el servidor le indique el
+ numero de reserva (-1 si no hay lugar disponible) y luego (si hay asiento disponible)
+ va a pagar el pasaje correspondiente a la oficina de micro. El servidor atiende los pedidos
+ de acuerdo al orden de llegada, cuando un cliente solicita un pasaje a cierto destino,
+ busca un asiento disponible para ese destino y luego le indica el asiento reservado.
+ Maximizar la concurrencia, no modelar la oficina de pago de pasaje.
+
+ Procedure Ada2017
+TASK servidor is
+    ENTRY num_reserva(destino: IN string, num: OUT integer, id: IN integer, asiento: IN integer);
+end Servidor;
+
+TASK TYPE cliente is
+  ENTRY asiento(asiento: IN integer);
+end cliente;
+TASK BODY cliente is
+    destino: string;
+    num: integer;
+    id: integer;
+    asiento: integer;
+begin
+    servidor.num_reserva(destino, num, id);
+    if(num!= -1){
+      //pagar viaje
+    }else{
+      //se va
+
+    }
+end cliente;
+
+end cliente;
+
+TASK BODY servidor is
+begin
+    LOOP
+        ACCEPT num_reserva(destino: IN string, num: OUT integer, id: IN integer, asiento: OUT integer) is
+              num = destino.reserva(); //da numero de reserva, -1 si no hay lugar
+              asiento = darAsiento();
+        end num_reserva;
+    end LOOP;
+end servidor;

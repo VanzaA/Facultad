@@ -1,0 +1,47 @@
+
+array tarea[1 to 40] of integer;
+array estado_tarea[1 to 40] of string;
+sem cola1=1;
+array espero_correccion[1 to 40]of integer;
+int aprobados;
+
+Process Alumno [i:1..40]{
+    int tarea[i] = asignarTarea();
+    //hacer tarea
+    estado_tarea[i]="A corregir";
+    p(cola1);
+    cola_tarea.push(tarea[i]);
+    v(cola1);
+    p(espero_correccion[i]);
+    while(estado_tarea[i]=="Desaprobado"){
+      tarea.corregir();
+      p(cola1);
+      cola.push(tarea);
+      v(cola1);
+      p(espero_correccion[i]);
+    }
+    //irse
+}
+
+
+
+}
+
+Process Maestra{
+  int tarea;
+    while(arobados<40){
+        if(!empty(cola_tarea)){
+          p(cola1);
+          tarea= cola.pop();
+          v(cola1);
+          tarea.corregir();
+          if(tarea.correcta()){
+            estado_tarea[tarea]="Aprobado";
+            aprobados++;
+          }else{
+            estado_tarea[tarea]="Desaprobado";
+          }
+          v(espero_correccion[tarea]);
+        }
+    }
+}

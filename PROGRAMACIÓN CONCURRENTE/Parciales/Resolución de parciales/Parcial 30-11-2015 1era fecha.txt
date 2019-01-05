@@ -1,0 +1,72 @@
+En una empresa hay un sistema de seguridad que cuenta con 10 sensores, 1 central y 4 actuadores diferentes según su función. 
+
+Los sensores están continuamente midiendo lo que necesitan, y si el valor está fuera del rango normal, le avisan a la central del problema y continúan sensando. Cada sensor tiene la función Sensor() para tomar la medida que necesita y la función FueraDeRango() que es llamada por cada sensor para saber si el valor medido está fuera de rango normal.
+
+La central recibe los pedidos de cada sensor (según el orden de llegada), y le envía la información al actuador correspondiente de acuerdo al problema. La central tiene la función DeterminarActuador() que de acuerdo al problema recibido define que actuador debe resolverlo. 
+
+Cada actuador recibe la información de los errores y los resuelve. Cada actuador tiene la función ResolverProblema() para simular que está resolviendo el problema.
+
+Nota: maximizar la concurrencia.
+
+
+TASK Central IS
+	entry sensorFueraDeCentral(in valor: string);
+
+TASK BODY Central IS
+int actuador;
+
+	loop
+		ACCEPT sensorFueraDeCentral(in valor:string);
+			actuador = DeterminarActuador();
+			actuador.solucionarProblema(valor);
+		end sensorFueraDeRango;
+	end loop;
+
+end Central; 
+
+
+
+TASK TYPE Sensor IS
+TASK BODY Sensor IS
+
+boolean fuera = false; // no está fuera de rango
+int sensor;
+
+	loop 	
+
+		while(!fuera) { //no está fuera de rango
+			sensor = Sensor();
+			if (FueraDeRango(sensor)) {
+				fuera = true; //está fuera de rango
+			}
+		}
+		Buffer.sensorFueraDeRango(valor);
+
+	end loop;
+
+
+end Sensor;
+
+
+
+TASK TYPE Actuador IS
+TASK BODY Actuador IS
+
+	ACCEPT solucionarProblema(in valor: string);
+		ResolverProblema();
+
+	end solucionarProblema;
+
+end Actuador;
+
+
+
+TASK TYPE Buffer IS
+TASK BODY Buffer IS
+queue cola;
+
+	loop 
+	SELECT ACCEPT Central.sensorFueraDeCentral(cola.pop());
+	ACCEPT sensorFueraDeRango(valor in: integer);
+		cola.push(valor);
+		end sensorFueraDeRango;

@@ -1,0 +1,62 @@
+En la guardia de un hospital hay 1 enfermera, 4 médicos y P pacientes. 
+Cuando los pacientes llegan son revisados por la enfermera de acuerdo al orden de llegada para que ésta le dé un número de prioridad de acuerdo a la gravedad para ser atendido por algún médico; luego espera a que cualquiera de los médicos lo atienda, y cuando termina la atención se retira.
+Los médicos deben atender a los pacientes de acuerdo al orden de prioridad dado por la enfermera (cuando un médico está libre debe atender a aquel paciente que está esperando cuyo número de prioridad es mayor).
+Nota: la enferma y los médicos no necesitan terminar su ejecución. Maximizar la concurrencia.
+
+queue cola;
+sem sem_cola= 1;
+sem sem_enfermera= 0;
+sem pacientes[1..P] = [1];
+
+queue colaPrioridad;
+sem sem_colaPrioridad= 1;
+
+sem sem_medico = 0;
+
+Process Paciente: [id= 1..P]{
+var
+begin
+	P(sem_cola);
+	cola.encolar(id);
+	V(sem_cola);
+	V(sem_enfermera);
+	P(pacientes[id]);
+}
+
+
+Process Enfermera ::{
+var 
+	int id_paciente;
+	int prioridad;
+begin
+	while (true){
+		P(sem_cola);
+		id_paciente = cola.desencolar();
+		V(sem_cola);	
+		prioridad = asignarPrioridad(id_paciente);
+
+		P(sem_colaPrioridad);
+		cola.encolarPrioridad(prioridad);
+		V(sem_colaPrioridad);
+
+		V(sem_medico);
+	}
+}
+
+
+Process Medico: [id= 1.. 4]{
+var 
+	int id_paciente;
+begin
+	while (true){
+		P(sem_colaPrioridad);
+		id_paciente = cola.desencolarPrioridad();
+		V(sem_colaPrioridad);
+
+		V(pacientes[id_paciente]);
+		// atiende al paciente
+	}
+
+}
+
+

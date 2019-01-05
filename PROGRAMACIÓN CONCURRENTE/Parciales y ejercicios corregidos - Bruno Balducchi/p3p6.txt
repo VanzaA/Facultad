@@ -1,0 +1,81 @@
+
+
+
+Process Jugador[i:1..20]{
+    int miEquipo = Asignador.asignar();
+    Equipo[miEquipo].estoy_listo();
+    Cancha[Equipo.getCancha].esperar_resto();
+    //irse
+}
+
+Monitor Asignador {
+  int[1..4] equipos;
+  Procedure asignar (int equipo_asignado){
+    equipo_asignado = darEquipo(equipos, equipo_asignado); // método mágico que le da un Equipo al jugador
+  }
+}
+
+Monitor Equipo[i:1..4]{
+  int cant;
+  cond esperar_compa;
+  int cancha_asignada;
+
+  Procedure estoy_listo(){
+    cant++;
+    if(cant<5){
+      wait(esperar_compa);
+    }
+    else{
+      Asignador_cancha.asignarCancha(i);
+      signal_all(esperar_compa);
+    }
+  }
+
+  Procedure setCancha(int cancha){
+    cancha_asignada:=cancha;
+  }
+
+  Procedure getCancha(){
+    return cancha_asignada;
+  }
+
+}
+
+Monitor Asignador_cancha{
+  int equipos_listos=0;
+  cond esperar_equipo;
+  int cancha=0;
+
+  Procedure asignarCancha(int equipo){
+      equipos_listos++;
+      if(equipos_listos != 2){
+          wait(esperar_equipo);
+      }else{
+        cancha++;
+        equipos_listos:=0;
+        signal_all(esperar_equipo);
+      }
+      Equipo[equipo].setCancha(cancha);
+  }
+
+}
+Monitor Cancha[i:1..2]{
+  cond esperar;
+  int preparados=0;
+
+  Procedure esperar_resto(){
+    preparados++;
+    if(preparados<10){
+      wait(esperar);
+    }
+    else{
+      signalall(esperar);
+    }
+    Cancha.jugarPartido();
+  }
+
+  Procedure jugarPartido(){
+    delay(50);
+  }
+
+}

@@ -1,0 +1,127 @@
+1) Resolver con MONITORES el siguiente problema. En un Crucero por el Mediterráneo hay 200 personas que deben subir al barco por medio de 10 lanchas con 20 lugares 
+cada una. Cada persona sube a la lancha que le corresponde. Cuando en una lancha han subido sus 20 personas durante 5 minutos navega hasta el barco. Recién cuando han
+llegado las 10 lanchas al barco se les permite a las 200 personas subir al barco. 
+Nota: suponga que cada persona llama a la función int NúmeroDeLanca () que le devuelve un valor entre 0 y 9 indicando la lancha a la que debe subir. Maximizar la 
+concurrencia.
+
+2) Resolver con PMA el siguiente problema. Para una aplicación de venta de pasaje se tienen 3 servidores replicados para mejorar la eficiencia en la atención. Existen 
+N clientes que hacen alguna de estas dos solicitudes: compra de un pasaje o devolución de un pasaje. Las solicitudes se deben atender dando prioridad a las solicitudes
+de compra. 
+Nota: suponga que cada cliente llama a la función TipoSolicitud() que le devuelve el tipo de solicitud a realizar. Maximizar la concurrencia.
+
+
+para la promoción era elegir hacer uno de los dos ejercicios.
+nota: la sintaxis de los ejercios seguramente no es perfecta :P
+
+1) (fue el que hice así que supongo que está bien ya que lo aprobé xD) 
+
+Monitor lancha [i=0..9]  { 
+personasBordo integer=0;
+espera cond;
+
+
+procedure subir {
+        personasBordo++;
+        if personasBordo==20 {delay(5); mins  #navegan  (no duermo el último porque sino deja el monitor y no se ejecutaria esto)      
+                              crucero.LlegoLancha();
+                              signal_all(espera); #una vez que viajamos y llegamos al crucero todas las lanchas despierto a las persona para que puedan arbordar el crucero
+                              }
+        else {wait(espera);
+             }
+
+
+}end subir
+} end montior lancha
+
+
+Monitor crucero {
+lanchas integer=0;
+dormir cond;
+personas integer=0;
+
+procedure LlegoLancha{
+     lanchas++;
+     if lanchas==10 {signal_all(dormir);
+                     }
+     else {wait(dormir);}
+}end procedure LlegoLancha
+
+
+procedure abordar{
+    personas++;
+    if personas==200 {#subieron todos} 
+}end abordar  #nota: habia que hacerlo pero nunca especificaron bien QUÉ tenía que hacer así que hice esto o también le puse un else que no hacía nada 
+}end montior crucero
+
+
+
+
+Process persona [i=1..200]
+lancha integer=-1;
+{   lancha:=NúmeroDeLancha();
+    lancha[lancha].abordar();
+    crucero.abordar();
+}end persona
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+nota: este no lo resolví y para mi tenía solo una trampa que voy a explicar a continuación. Voy a resolverlo como lo hubiese hecho pero no les aseguro que sea correcto :P
+la trampa consiste en que al ser PMA, al poner un canal para los 3 servidores común, puede darse el caso de que quede un elemento, dos servidores preguntaron por el 
+empty, entonces ambos pasan la condición guardada del if pero solo uno va a poder "hacer la recepción" y el otro se va a boloquear cuando podría hacer otra cosa. Por esp
+voy a generar una especie de buffer que recibe los pedidos tanto de las personas como de esos servidores (este "buffer", se encarga de dar prioridad. Los serviodres
+solo piden laburo).
+Si aclararon cosas y demás no les di bola en este ejercicio así que si saben de algo que me comí o lo que sea avisen por favor XD
+
+chan compras (idPersona  int,datos);
+chan devoluciones(idPersona int, datos);
+chan persona [1..N] (datosRta);
+chan perdidoTrabajo (idServidor int);
+chan trabajo[1..3](idPersona int, datos, tipoTrabajo int);
+
+Proceso buffer
+idPersona integer=-1;
+idServidor integer=-1;
+datos;
+{
+while True{
+           if not empty(compras) -->  Receive compras (idPersona,datos);
+                                      Receive pedirTrabajo(idServidor);  #si no hay ningun servidor que me pida trabajo esto se traba pero creo que no dejo de complir y no hay forma de evitar esto
+                                      send trabajo[idServidor](idPersona, datos, 1); #1= compra 2=devolucion
+
+           cuadradoBlanco   empty(compras) and not empty(devoluciones) --> Receive devoluciones (idPersona,datos);
+                                                                           Receive pedirTrabajo(idServidor); #idem en compras
+                                                                           send trabajo[idServidor](idPersona, datos, 2); #1= compra 2=devolucion
+}end while
+}end buffer
+
+
+Process persona[id=1..N]
+tipoDeSolicitud integer=-1;
+datos;
+datosRta;
+{   tipoDeSolicitud:=TipoSolictud();  #si devuelve 1=compra y 2= devolucion
+    if tipoDeSolictud==1  {Send compras(id,datos);}
+    else{Send devoluciones(id,datos);}
+    
+    Receibe persona[id](datosRta);  
+}end persona
+
+
+process servidor [idS=1..3]
+tipoDeSolicitud integer=-1;
+datos;
+{   while True{
+               Send pedirTrabajo(idS);
+               Receibe trabajo[idS](idPersona, datos, tipoDeSolicitud);
+               if tipoDeSolicitud ==1{
+                                      #es una compra y trabaja para resolverla
+                                      datos:= resultado en respuesta;
+                                      }end if
+               else {#es una devolucion y trabaja para resolverla
+                     datos:= resultado en respuesta; 
+                    }end else
+               Send persona[idPersona](datos);
+}end while
+}end servidor
+     
