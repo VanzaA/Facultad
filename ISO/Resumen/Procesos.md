@@ -227,3 +227,156 @@ evento, pasa al estado de ready, para
 competir por CPU, pues no está
 esperando por ningún evento...
 
+## Comportamiento de los procesos
+
+Los Procesos alternan ráfagas de CPU y de
+I/O.
+
+- CPU-bound
+    - Mayor parte del tiempo utilizando la CPU
+- I/O-bound (I/O = E/S)
+    - Mayor parte del tiempo esperando por I/O
+- La velocidad de la CPU es mucho mas
+rápida que la de los dispositivos de E/S
+- Pensar: Necesidad de atender rápidamente
+procesos I/O-bound para mantener el
+dispositivo ocupado y aprovechar la CPU para
+procesos CPU-bound
+
+##Planificación
+– Necesidad de determinar cual de todos los procesos que están listos para ejecutarse, se ejecutará a continuación en un ambiente
+multiprogramado
+ Algoritmo de Planificación
+– Algoritmo utilizado para realizar la
+planificación del sistema
+
+### Algoritmos Apropiativos y No Apropiativos
+- En los algoritmos Apropiativos (preemtive)
+existen situaciones que hacen que el
+proceso en ejecución sea expulsado de la
+CPU
+- En los algoritmos No Apropiativo
+(nonpreemptive) los procesos se ejecutan
+hasta que el mismo (por su propia cuenta)
+abandone la CPU
+    - Se bloquea por E/S o finaliza
+    - No hay decisiones de planificación durante las interrupciones de reloj
+
+### Categorías de los Algoritmos de Planificación
+- Según el ambiente es posible requerir
+algoritmos de planificación diferentes, con
+diferentes metas:
+    - Equidad: Otorgar una parte justa de la CPU a cada proceso
+    - Balance: Mantener ocupadas todas las partes del sistema
+- Ejemplos:
+    - Procesos por lotes (batch)
+    - Procesos Interactivos
+    - Procesos en Tiempo Real
+
+#### Procesos Batch
+- No existen usuarios que esperen una
+respuesta en una terminal.
+- Se pueden utilizar algoritmos no
+apropiativos
+- Metas propias de este tipo de algoritmos:
+    - Rendimiento: Maximizar el número de trabajos por hora
+    - Tiempo de Retorno: Minimizar los tiempos entre el comienzo y la finalización
+    - Uso de la CPU: Mantener la CPU ocupada la mayor cantidad de tiempo posible
+- Ejemplos de Algoritmos:
+    - FCFS – First Come First Served
+    - SJF – Shortest Job First
+
+### Procesos Interactivos
+- No solo interacción con los usuarios
+    - Un servidor, necesita de varios procesos para dar respuesta a diferentes requerimientos
+- Son necesarios algoritmos apropiativos
+para evitar que un proceso acapare la CPU
+- Metas propias de este tipo de algoritmos:
+    - Tiempo de Respuesta: Responder a peticiones con rapidez
+    - Proporcionalidad: Cumplir con expectativas de los usuarios
+        - Si el usuario le pone STOP al reproductor de música, que la música deje de ser reproducida en un tiempo considerablemente corto.
+
+### Política Versus Mecanismo
+- Existen situaciones en las que es
+necesario que la planificación de uno o
+varios procesos se comporte de
+manera diferente
+- El algoritmo de planificación debe
+estar parametrizado, de manera que
+los procesos/usuarios pueden indicar
+los parámetros para modificar la
+planificación
+
+- El Kernel implementa el mecanismo
+- El usuario/proceso/administrador utiliza los parámetros para determinar la Política
+- Ejemplo:
+    - Un algoritmo de planificación por prioridades yuna System Call que permite modificar laprioridad de un proceso (man nice)
+    - Un proceso puede determinar las prioridades de los procesos que el crea, según la importancia de los mismos.
+
+## Creación de procesos
+- Un proceso es creado por otro proceso
+- Un proceso padre tiene uno o más
+procesos hijos.
+- Se forma un árbol de procesos
+
+### Actividades en la creación
+- Crear la PCB
+- Asignar PID (Process IDentification)
+único
+- Asignarle memoria para regiones
+    - Stack, Text y Datos
+- Crear estructuras de datos asociadas
+    - Fork (copiar el contexto, regiones de
+datos, text y stack)
+
+### Relación entre procesos Padre e Hijo
+> Con respecto a la Ejecución:
+- El padre puede continuar ejecutándose
+concurrentemente con su hijo
+- El padre puede esperar a que el
+proceso hijo (o los procesos hijos)
+terminen para continuar la ejecución.
+
+Con respecto al Espacio de Direcciones:
+- El hijo es un duplicado del proceso
+padre (caso Unix)
+- Se crea el proceso y se le carga
+adentro el programa (caso Windows)
+
+### Creación de Procesos
+- En UNIX:
+    - system call fork() crea nuevo proceso
+    - system call execve(), usada después del fork,carga un nuevo programa en el espacio dedirecciones.
+- En Windows:
+    - system call CreateProcess() crea un nuevo proceso y carga el programa para ejecución
+
+
+### Terminación de procesos
+- Ante un (exit), se retorna el control al
+sistema operativo
+- El proceso padre puede esperar recibir un
+código de retorno (via wait)
+- Proceso padre puede terminar la ejecución
+de sus hijos (kill)
+- La tarea asignada al hijo se terminó
+- Cuando el padre termina su ejecución
+- Habitualmente no se pemite a los hijos continuar, pero existe la opción.
+- Terminación en cascada
+
+### Procesos Cooperativos e Independientes
+- Independiente: el proceso no afecta ni
+puede ser afectado por la ejecución de
+otros procesos. No comparte ningún
+tipo de dato.
+- Cooperativo: afecta o es afectado por
+la ejecución de otros procesos en el
+sistema.
+
+#### Para qué sirven los procesos cooperativos?
+- Para compartir información (por
+ejemplo, un archivo)
+- Para acelerar el cómputo (separar una
+tarea en sub-tareas que cooperan
+ejecutándose paralelamente)
+- Para planificar tareas de manera tal
+que se puedan ejecutar en paralelo.
