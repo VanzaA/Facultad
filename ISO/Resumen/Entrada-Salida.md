@@ -26,7 +26,7 @@ mouse, serial ports)
     - Read/Write: Disco
 
 ### Servicios
-- Planificación: rganización de los requerimientos a losdispositivos
+- Planificación: organización de los requerimientos a los dispositivos
     - Ej: Planificación de requerimientos a disco para minimizar tiempos
 - Buffering – Almacenamiento de los datos en memoria mientras se transfieren
     - Solucionar problemas de velocidad entre los dispositivos
