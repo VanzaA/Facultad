@@ -242,12 +242,10 @@ procesos I/O-bound para mantener el
 dispositivo ocupado y aprovechar la CPU para
 procesos CPU-bound
 
-##Planificación
-– Necesidad de determinar cual de todos los procesos que están listos para ejecutarse, se ejecutará a continuación en un ambiente
-multiprogramado
- Algoritmo de Planificación
-– Algoritmo utilizado para realizar la
-planificación del sistema
+## Planificación
+- Necesidad de determinar cual de todos los procesos que están listos para ejecutarse, se ejecutará a continuación en un ambiente multiprogramado
+- Algoritmo de Planificación
+- Algoritmo utilizado para realizar la planificación del sistema
 
 ### Algoritmos Apropiativos y No Apropiativos
 - En los algoritmos Apropiativos (preemtive)
