@@ -201,7 +201,7 @@ fallo de página
 
 ### Perfomance 
 
-- Tasa de Page Faults 0 < p < 1
+- Tasa de Page Faults 0 <= p <= 1
 - Si p = 0 no hay page faults
 - Si p = 1, cada a memoria genera un page fault
 - Effective Access Time (EAT)
