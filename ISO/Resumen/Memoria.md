@@ -497,14 +497,6 @@ modificadas son duplicadas
     - Cada vez que se crea un proceso se reserva una zona del área de intercambio igual al tamaño de imagen del proceso. A cada proceso se le asigna la dirección en disco de su área de intercambio. La lectura se realiza sumando el número de página virtual a la dirección de comienzo del área asignada al proceso.
     - No se asigna nada inicialmente. A cada página se le asigna su espacio en disco cuando se va a intercambiar, y el espacio se libera cuando la página vuelve a memoria. Problema: se debe llevar contabilidad en memoria (página a página) de la localización de las páginas en disco.
 
-    >  Cuando una página no esta en
-memoria, sino en disco, como
-podemos saber en que parte del área
-de intercambio está?
-
-- Respuesta : El PTE de dicha pagina tiene el bit
-V=0 y todos los demás bits sin usar!
-
 #### Área de Intercambio - Linux
 - Permite definir un número
 predefinido de áreas de
