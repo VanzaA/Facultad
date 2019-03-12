@@ -23,24 +23,19 @@ mouse, serial ports)
     - Acceso Exclusivo: Impresora
     - Read only: CDROM
     - Write only: Pantalla
-    -Read/Write: Disco
+    - Read/Write: Disco
 
 ### Servicios
 - Planificación: rganización de los requerimientos a losdispositivos
     - Ej: Planificación de requerimientos a disco para minimizar tiempos
-- Buffering – Almacenamiento de los datos en
-memoria mientras se transfieren
+- Buffering – Almacenamiento de los datos en memoria mientras se transfieren
     - Solucionar problemas de velocidad entre los dispositivos
     - Solucionar problemas de tamaño y/o forma de los datos entre los dispositivos
-- Caching – Mantener en memoria copia de los
-datos de reciente acceso para mejorar
-performance
-- Spooling – Administrar la cola de
-requerimientos de un dispositivo
+- Caching – Mantener en memoria copia de los datos de reciente acceso para mejorar performance
+- Spooling – Administrar la cola de requerimientos de un dispositivo
     - Algunos dispositivos de acceso exclusivo, nopueden atender distintos requerimientos al mismo tiempo: Por ej. Impresora
     - Spooling es un mecanismo para coordinar el acceso concurrente al dispositivo
-- Reserva de Dispositivos: Acceso
-exclusivo
+- Reserva de Dispositivos: Acceso exclusivo
 - Manejo de Errores:
     - El S.O. debe administrar errores ocurridos(lectura de un disco, dispositivo no disponible, errores de escritura)
     - La mayoría retorna un número de error o código cuando la I/O falla.
@@ -58,9 +53,7 @@ exclusivo
     - Archivos abiertos
     - Conexiones de red
     - Etc.
-- Hay varias estructuras complejas que
-representan buffers, utilización de la
-memoria, disco, etc.
+- Hay varias estructuras complejas que representan buffers, utilización de la memoria, disco, etc.
 
 #### Desde el Requerimiento de I/O hasta el Hardware
 - Consideremos la lectura sobre un archivo en un disco:
