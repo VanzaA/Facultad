@@ -56,9 +56,7 @@ cargado a memoria.
 - Varían entre procesos (Context Switch)
 
 ### Dir. Lógicas vs. Físicas
-- Si la CPU trabaja con direcciones lógicas,
-para acceder a memoria principal, se deben
-transformar en direcciones físicas.
+- Si la CPU trabaja con direcciones lógicas, para acceder a memoria principal, se deben transformar en direcciones físicas.
     - Resolución de direcciones (address-binding): transformar la dirección lógica en la dirección física correspondiente
 - Resolución en momento de compilación (Archivos .com de DOS) y en tiempo de carga
     - Direcciones Lógicas y Físicas son idénticas
@@ -77,9 +75,7 @@ realizado por hardware
     - Es parte del Procesador
     - Re-programar el MMU es una operación  privilegiada
         -solo puede ser realizada en Kernel Mode
-- El valor en el “registro de realocación” es sumado a cada dirección generada por el
-proceso de usuario al momento de acceder
-a la memoria.
+- El valor en el “registro de realocación” es sumado a cada dirección generada por el proceso de usuario al momento de acceder a la memoria.
     - Los procesos nunca usan direcciones físicas
 
 __ver imagen diapositiva 15 tema 3 - memoria 1__
@@ -205,7 +201,7 @@ fallo de página
 
 ### Perfomance 
 
-- Tasa de Page Faults 0  p  1
+- Tasa de Page Faults 0 < p < 1
 - Si p = 0 no hay page faults
 - Si p = 1, cada a memoria genera un page fault
 - Effective Access Time (EAT)
