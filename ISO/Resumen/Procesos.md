@@ -88,6 +88,7 @@ soporte de HW.
 software que se ejecuta en el procesador como cualquier otro proceso
 > ¿El kernel es un proceso? Y de ser así ¿Quien lo controla?
 Diferentes enfoques de diseño
+
 __Enfoque 1 – El Kernel como entidad independiente__
 - El Kernel se ejecuta fuera de todo
 proceso
