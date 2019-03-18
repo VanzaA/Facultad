@@ -7,5 +7,5 @@
 -   [Memoria](./Memoria.md)
 -   [Entrada y Salida](./Entrada-Salida.md)
 -   [File System](./FileSystem.md)
--   [Buffer Cache](./Buffercache.md)
+-   [Buffer Cache](./BufferCache.md)
 -   [Procesos avanzados](./threads-ipc.md)
