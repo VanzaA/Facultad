@@ -8,4 +8,4 @@
 -   [Entrada y Salida](./Entrada-Salida.md)
 -   [File System](./FileSystem.md)
 -   [Buffer Cache](./BufferCache.md)
--   [Procesos avanzados](./threads-ipc.md)
+-   [Procesos avanzados](./threadsIpc.md)
