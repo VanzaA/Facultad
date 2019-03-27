@@ -22,7 +22,7 @@ Federio Gasquez} % Replace "Author's Name" with your name
 
 \begin{enumerate}
 
-\item \textbf{Ejercicio 1. Responder brevemente los siguientes incisos:}
+\item \textbf{ Responder brevemente los siguientes incisos:}
 
 \begin{enumerate}
 \item \textbf{¿Qué es un problema (computacional) de decisión? ¿Es el tipo de problema más general que se puede formular?}
@@ -30,6 +30,8 @@ Federio Gasquez} % Replace "Author's Name" with your name
 \item \textbf{En la clase teórica 1 se hace referencia al problema de satisfactibilidad de las fórmulas booleanas (se da como ejemplo la fórmula $\varphi = (x_1 \vee x_2) \wedge (x_3 \vee x_4)$ y la asignación A = (V, F, V, V)).\\ Formular las tres formas del problema, teniendo en cuenta las tres visiones de MT consideradas: calculadora, aceptadora o reconocedora y generadora.}
 
 \item \textbf{¿Qué postula la Tesis de Church-Turing?}
+
+
 \item \textbf{¿Cuándo dos MT son equivalentes? ¿Cuándo dos modelos de MT son equivalentes?}
 \item \textbf{¿En qué difiere un lenguaje recursivo de un lenguaje recursivamente numerable no recursivo?}
 \item \textbf{¿En qué difiere un lenguaje recursivamente numerable de uno que no lo es?}
@@ -41,29 +43,73 @@ Federio Gasquez} % Replace "Author's Name" with your name
 \item \textbf{Justificar por qué si L1 $\in$ CO-RE y L2 $\in$ CO-RE, entonces (L1 $\wedge$ L2) $\in$ CO-RE}
 \end{enumerate}
 
+\item \textbf{ Dado el alfabeto $\sum$ = \{a, b, c\}:}
 
+\begin{enumerate}
 
-% -----------------------------------------------------
-% Second problem
-% -----------------------------------------------------
+    \item \textbf{ Obtener el lenguaje $\sum^*$ y el conjunto de partes del subconjunto de $\sum^*$ con cadenas de a lo
+sumo dos símbolos. ¿Cuál es el cardinal (o tamaño) de este último conjunto?  }
 
-\item This is a problem about a double integral!
-
-$$\int_{y=0}^{y=6} \int_{x=0}^{x=6-y} f(x,y) \ dx \ dy = 8/3.$$
-
-or if you don't want it displayed, $\int_{y=0}^{y=6} \int_{x=0}^{x=6-y} f(x,y) \ dx \ dy = 8/3,$ or perhaps you prefer $\displaystyle \int_{y=0}^{y=6} \int_{x=0}^{x=6-y} f(x,y) \ dx \ dy = 8/3$?
-
-\item Let's take partial derivatives a different way! 
-
-$$\frac{\partial}{\partial x} xy = y.$$
-
-If you need a particular symbol and don't know the code for it, try \url{detexify.kirelabs.org}.
+\item \textbf{Dado el lenguaje $L = {a^n b^n c^n | n \geq 0}$, 
+obtener la intersección 
+$\sum^* \cap$ L, la unión $\sum^* \cup$ L, el
+complemento de L respecto de $\sum^*$, 
+y la concatenación $\sum^*$ . L.}
 
 \end{enumerate}
 
-% ---------------------------------------------------
-% Anything after the \end{document} will be ignored by the typesetting.
-% ----------------------------------------------------
+\item \textbf{ Construir una MT (puede tener varias cintas) que acepte de la manera más eficiente
+posible el lenguaje $L = \{a^n b^n c^n | n \geq 0\}$. Plantear primero la idea general.}
+
+\item \textbf{Explicar (informal pero claramente) cómo simular una MT por otra que en un paso
+no pueda simultáneamente modificar un símbolo y moverse.}
+
+\item \textbf{Explicar (informal pero claramente) cómo simular una MT por otra que no tenga el
+movimiento S (es decir el no movimiento).}
+
+\item \textbf{Sea USAT el lenguaje de las fórmulas booleanas satisfactibles con exactamente una
+asignación de valores de verdad. P.ej. $x_1 \wedge x_2$ pertenece a USAT, mientras que $(x_1 \wedge x_2) \vee x_3$ no.
+Indicar, justificando la respuesta, si la siguiente MTN acepta USAT: }
+
+\begin{enumerate}
+\item \textbf{Si la fórmula de entrada no es correcta sintácticamente, rechaza.}
+\item \textbf{ Genera no determinísticamente una asignación A, y si A no satisface la fórmula, rechaza.}
+\item \textbf{Genera no determinísticamente una asignación A’ $\neq$ A. Si A’ no satisface la fórmula, acepta,
+y si A’ la satisface, rechaza.}
+\end{enumerate}
+
+\textbf{Ayuda: Considerar p.ej. el caso en que la fórmula tiene dos asignaciones que la satisfacen.
+}
+
+\item \textbf{Considerando el Lema 4 estudiado en la Clase Teórica 2 $(R = RE \cap CO-RE)$:}
+
+\begin{enumerate}
+\item \textbf{ Construir la MT M.}
+\item \textbf{Probar la correctitud de la construcción.} 
+\end{enumerate}
+
+\item \textbf{Sean $L_1$ y $L_2$ dos lenguajes recursivamente numerables de números naturales
+representados en notación unaria (por ejemplo, el número 5 se representa con 11111). Probar
+que también es recursivamente numerable el lenguaje L = \{x $\mid$ x es un número natural
+representado en notación unaria, y existen y, z, tales que y + z = x, con y $\in L_1$, z $\in L_2$\}.\\}
+\textbf{Ayuda: la prueba es similar a la de la clausura de RE con respecto a la concatenación. }
+ 
+\item \textbf{ Dada una MT M1 con $\sum$ = }
+
+\begin{enumerate}
+\item \textbf{ Construir una MT $M_2$ que determine si L($M_1$) tiene al menos una cadena.}
+\item \textbf{ ¿Se puede construir además una MT $M_3$ para determinar si L($M_1$) tiene a lo sumo una
+cadena? Justificar.
+}
+\end{enumerate}
+
+\textbf{Ayuda para la parte (1): Si L(M1) tiene al menos una cadena, entonces existe al menos una
+cadena w de unos y ceros, de tamaño n, tal que M1 a partir de w acepta en k pasos. Teniendo
+en cuenta esto, pensar cómo M2 podría simular M1 considerando todas las cadenas de unos y
+ceros hasta encontrar eventualmente una que M1 acepte (¡cuidándose de los casos en que M1
+entre en loop!)}
+
+\end{enumerate}
 
 \end{document}
 
