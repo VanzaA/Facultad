@@ -26,14 +26,46 @@ Federio Gasquez} % Replace "Author's Name" with your name
 
 \begin{enumerate}
 \item \textbf{¿Qué es un problema (computacional) de decisión? ¿Es el tipo de problema más general que se puede formular?}
+Un problema de decisión es un problema en donde las respuestas posibles son "sí" o "no".
 \item \textbf{¿Qué cadenas integran el lenguaje aceptado por una MT?}
+El conjunto de las cadenas aceptadas por la MT M es el lenguaje aceptado o reconocido por M, y se denota con L(M). Considerando la visión de
+MT M calculadora, sólo cuando M se detiene en un estado q $\in$ F debe tenerse en cuenta
+el contenido final de la cinta, es decir la cadena de salida (o simplemente la salida).
 \item \textbf{En la clase teórica 1 se hace referencia al problema de satisfactibilidad de las fórmulas booleanas (se da como ejemplo la fórmula $\varphi = (x_1 \vee x_2) \wedge (x_3 \vee x_4)$ y la asignación A = (V, F, V, V)).\\ Formular las tres formas del problema, teniendo en cuenta las tres visiones de MT consideradas: calculadora, aceptadora o reconocedora y generadora.}
 
 \item \textbf{¿Qué postula la Tesis de Church-Turing?}
 
+la conjetura conocida como Tesis de Church-Turing, indica que todo lo computable puede ser llevado a
+cabo por una máquina de Turing
 
 \item \textbf{¿Cuándo dos MT son equivalentes? ¿Cuándo dos modelos de MT son equivalentes?}
+Dos máquinas de turing son equivalentes cuando reconocen el mismo lenguaje. Dos modelos de
+máquina de turing son equivalentes cuando poseen el mismo poder de cómputo, es decir a partir de una
+se puede simular la otra y viceversa.
 \item \textbf{¿En qué difiere un lenguaje recursivo de un lenguaje recursivamente numerable no recursivo?}
+
+Un lenguaje es recursivamente numerable si y sólo si existe una MT que lo reconoce.
+Es decir, si L es el conjunto de todos los lenguajes (cada uno integrado por cadenas
+finitas de símbolos pertenecientes a un alfabeto universal $\sum$), sólo los lenguajes
+recursivamente numerables de L son reconocibles por una MT (por esto es que a los
+problemas de decisión asociados se los conoce como computables). La clase de los
+lenguajes recursivamente numerables se denomina RE (por recursively enumerable
+languages). El nombre se debe a que las cadenas de estos lenguajes se pueden
+enumerar. De esta manera, dado L $\in$ RE, si M es una MT tal que L(M) = L, se cumple
+para toda cadena w de $\sum^*$ que:
+\begin{itemize}
+\item Si w $\in$ L, entonces M a partir de w se detiene en su estado $q_A$ .
+\item Si w $\notin$ L, entonces M a partir de w se detiene en su estado q R o no se detiene.
+\end{itemize}
+Se define que un lenguaje es recursivo si y sólo si existe una MT M que lo reconoce y que se detiene cualquiera sea su entrada. La clase
+de los lenguajes recursivos se denomina R. A los problemas de decisión asociados se los
+conoce como decidibles, porque las MT que los resuelven pueden justamente decidir,
+cualquiera sea la instancia, si es positiva o negativa. Ahora, dado L $\in$ R, si M es una
+MT tal que L(M) = L, se cumple para toda cadena w de $\sum^*$ que:
+\begin{itemize}
+\item Si w $\in$ L, entonces M a partir de w se detiene en su estado q A .
+\item Si w $\notin$ L, entonces M a partir de w se detiene en su estado q R .
+\end{itemize}
 \item \textbf{¿En qué difiere un lenguaje recursivamente numerable de uno que no lo es?}
 \item \textbf{Probar que R $\subseteq RE \subseteq \mathcal{L}.$}
 \item \textbf{¿Cuándo un lenguaje está en la clase CO-RE? ¿Puede un lenguaje estar al mismo tiempo en la clase RE y en la clase CO-RE? ¿Para todo lenguaje de la clase CO-RE existe una MT que lo acepta?}
