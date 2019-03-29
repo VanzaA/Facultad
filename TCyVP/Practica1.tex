@@ -26,13 +26,26 @@ Federio Gasquez} % Replace "Author's Name" with your name
 
 \begin{enumerate}
 \item \textbf{¿Qué es un problema (computacional) de decisión? ¿Es el tipo de problema más general que se puede formular?}
-Un problema de decisión es un problema en donde las respuestas posibles son "sí" o "no".
+Un problema de decisión es un problema en donde las respuestas posibles son "sí" o "no".\\
+Se entiende que este conjunto de problemas no es el conjunto más general dado que
+existen aquellos problemas que no pueden ser resueltos algorítmicamente, siendo
+estos aquellos que son no deterministicos para ciertos subconjuntos de un dominio
+dado, así como tambien aquellos problemas que ni siquiera son computables.
+\\De igual forma existen problemas que pueden ser resueltos algoritmicamente y son
+más generales que los problemas de decisión como por ejemplo los problemas de
+búsqueda.
 \item \textbf{¿Qué cadenas integran el lenguaje aceptado por una MT?}
 El conjunto de las cadenas aceptadas por la MT M es el lenguaje aceptado o reconocido por M, y se denota con L(M). Considerando la visión de
 MT M calculadora, sólo cuando M se detiene en un estado q $\in$ F debe tenerse en cuenta
 el contenido final de la cinta, es decir la cadena de salida (o simplemente la salida).
 \item \textbf{En la clase teórica 1 se hace referencia al problema de satisfactibilidad de las fórmulas booleanas (se da como ejemplo la fórmula $\varphi = (x_1 \vee x_2) \wedge (x_3 \vee x_4)$ y la asignación A = (V, F, V, V)).\\ Formular las tres formas del problema, teniendo en cuenta las tres visiones de MT consideradas: calculadora, aceptadora o reconocedora y generadora.}
 
+
+Para la MT reconocedora, recibe una fórmula y si es satisfactoria dice SI, caso contrario
+dice NO.\\
+Para la  MT calculadora, recibe una fórmula y calcula la asignación de
+verdad que la satisface.\\
+Para la MT generadora, la máquina genera todas las fórmulas satisfacibles.
 \item \textbf{¿Qué postula la Tesis de Church-Turing?}
 
 la conjetura conocida como Tesis de Church-Turing, indica que todo lo computable puede ser llevado a
@@ -64,17 +77,88 @@ cualquiera sea la instancia, si es positiva o negativa. Ahora, dado L $\in$ R, s
 MT tal que L(M) = L, se cumple para toda cadena w de $\sum^*$ que:
 \begin{itemize}
 \item Si w $\in$ L, entonces M a partir de w se detiene en su estado q A .
-\item Si w $\notin$ L, entonces M a partir de w se detiene en su estado q R .
+\item Si w $\notin$ L, entonces M a partir de w se detiene en su estado q R .\\
 \end{itemize}
+Luego, sea $L\in R E-R$ , diremos que $L$ es un lenguaje recursivamente numerable no
+recursivo, es decir, que si existe una MT Ml que lo acepta, la misma no para siempre.
 \item \textbf{¿En qué difiere un lenguaje recursivamente numerable de uno que no lo es?}
-\item \textbf{Probar que R $\subseteq RE \subseteq \mathcal{L}.$}
+
+Sea L un lenguaje computable que no es recursivamente numerable, es decir  $L \in CO RE - R$ , entonces no existe una MT $M_l$ tal que L($M_l$)=L. Sin embargo,
+sabemos que existe una MT $M_l$ talque L($M_l$)=$L*c$.\\
+Luego, si L fuese un lenguaje no computable, sabemos que existe una MT que lo
+reconozca.\\
+Por lo tanto, sabemos que sea L un que no es recursivamente numerable, es 
+decir $L \notin RE$ , entonces no existe una MT $M_l$ tal que L($M_l$)=L. 
+\item \textbf{Probar que $R \subseteq RE \subseteq \mathcal{L}.$}
+
+Asumiendo un alfabeto universal de símbolos: $\sum$ =\{a 1, a2, a3, ...\}.\\
+$\sum^*$ es el conjunto de todas las cadenas finitas formadas con símbolos de $\sum$. L es el 
+conjunto de todos los lenguajes formados con cadenas de $\sum^*$: L = P($\sum^*$), es decir
+que L es el conjunto de partes de $\sum^*$.\\
+Un lenguaje L es recursivamente numerable L $\in$ R E si y sólo si existe una MT $M_l$
+que lo acepta, es decir L($M_l$)=L . Por lo tanto, para toda cadena w de $\sum^*$:
+\begin{itemize}
+\item  Si w $\in$ L , entonces $M_l$ a partir de w para en su estado $q_A$.
+\item  Si w $~notin$ L , entonces $M_l$ a partir de w para en su estado $q_R$ o no para.
+\end{itemize}
+Un lenguaje L es recursivo, L $\in$ R , si y sólo si existe una MT $M_l$ que lo acepta y para
+siempre (también se puede decir directamente que lo decide). Por lo tanto, para toda
+cadena w de $\sum^*$:
+\begin{itemize}
+\item Si w $\in$ L , entonces $M_l$ a partir de w para en su estado $q_A$ .
+\item Si w $\notin$ L , entonces $M_l$ a partir de w para en su estado $q_R$ .
+\end{itemize}
+Luego, por definición se cumple $R\subseteq R E\subseteq L$ .
+
+
 \item \textbf{¿Cuándo un lenguaje está en la clase CO-RE? ¿Puede un lenguaje estar al mismo tiempo en la clase RE y en la clase CO-RE? ¿Para todo lenguaje de la clase CO-RE existe una MT que lo acepta?}
+
+Un lenguaje está en CO-RE si su lenguaje complemento está en RE. Si, en ese caso, dicho lenguaje
+está en R. No, solo si esta en R.
+
 \item \textbf{Justificar por qué los lenguajes $\sum$ y $\emptyset$ son recursivos.}
+
+Sabemos por definición de $\sum^*$ que el mismo es un lenguaje infinito de cadenas finitas
+formado a partir de un alfabeto $\sum$, también finito por definición. Además, sabemos que
+$\sum^*$  es un conjunto recursivamente enumerable dado que existe un MT que compute su
+orden canónico. Luego, se entiende que el lenguaje $\sum^*$ pertenece a RE lo cual nos dice
+que siempre existe una MT que al menos lo acepte. Por otro lado, sabemos que dado
+un input $w \in \sum^*$  el mismo será finito y bastará con una cantidad finita de pasos dados
+por una MT para recorrerlo y, a su vez, determinar si el mismo es valido o no.\\
+Finalmente se deduce que dicha MT parará, validando el input. Por lo tanto, $\sum^*$ es un
+lenguaje recursivo. La construcción de una MT similar a la anterior permitiría a su vez
+validar cualquier input perteneciente al $\emptyset$ . Luego, el mismo será recursivo.
 \item \textbf{Si $L \subseteq \sum^*$, ¿se cumple que L $\in$ R?}
+
+No necesariamente. Si esto sucediera, todos los lenguajes pertenecerían a R. 
+Por ejemplo, HP no pertenece a R y esta incluido en $\sum^*$
+
 \item \textbf{Justificar por qué un lenguaje finito es recursivo.}
+
+Sea L un lenguaje finito, sabemos que L es un conjunto recursivamente enumerable
+dado que existe un MT que lo compute. Luego, se entiende que el lenguaje L pertenecea RE lo cual nos dice que siempre existe una MT que al menos lo acepte. Por otro lado,
+sabemos que dado un input w $\in$ L el mismo será finito y bastará con una cantidad
+finita de pasos dados por una MT para recorrerlo y, a su vez, determinar si el mismo es
+valido o no. Finalmente se deduce que dicha MT parará, validando el input. Por lo
+tanto, L es un lenguaje recursivo.
 \item \textbf{Justificar por qué si L1 $\in$ CO-RE y L2 $\in$ CO-RE, entonces (L1 $\wedge$ L2) $\in$ CO-RE}
+
+Sea L1 $\in$ CO-RE y L2 $\in$ CO-RE, entonces sabemos que $L_1^c , L _2^c  RE$ . De esto sabemos
+que para ambos lenguajes existe una MT que los acepta. Luego, se puede construir una
+MT M que reconozca su union, es decir:
+\begin{enumerate}
+\item  $L_1^c , L _2^c  RE$
+\item ($L_1^c \cup  L_2^c$) $\in$ RE, por propiedad de union de lenguajes
+\item $L_3 \in$ RE, $L_3 = (L_1^c \cup L_2^c )$
+\item $L_3^c \in CO-RE$
+\item ($L_1^c \cup  L_2^c)^c$ $\in$ CO-RE
+\item ($L_1 \cup  L_2)$ $\in$ CO-RE, por ley de morgan
+\item \textbf{($L_1 \cup  L_2)$ $\in$ CO-RE}
 \end{enumerate}
 
+
+
+\end{enumerate}
 \item \textbf{ Dado el alfabeto $\sum$ = \{a, b, c\}:}
 
 \begin{enumerate}
