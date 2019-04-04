@@ -16,7 +16,7 @@
 \begin{center}
 
 {\Large Agustin Vanzato \\
-Federio Gasquez} % Replace "Author's Name" with your name
+Federico Gasquez} % Replace "Author's Name" with your name
 \end{center}
 \vspace{0.05in}
 
@@ -26,6 +26,7 @@ Federio Gasquez} % Replace "Author's Name" with your name
 
 \begin{enumerate}
 \item \textbf{¿Qué es un problema (computacional) de decisión? ¿Es el tipo de problema más general que se puede formular?}
+
 Un problema de decisión es un problema en donde las respuestas posibles son "sí" o "no".\\
 Se entiende que este conjunto de problemas no es el conjunto más general dado que
 existen aquellos problemas que no pueden ser resueltos algorítmicamente, siendo
@@ -35,6 +36,7 @@ dado, así como tambien aquellos problemas que ni siquiera son computables.
 más generales que los problemas de decisión como por ejemplo los problemas de
 búsqueda.
 \item \textbf{¿Qué cadenas integran el lenguaje aceptado por una MT?}
+
 El conjunto de las cadenas aceptadas por la MT M es el lenguaje aceptado o reconocido por M, y se denota con L(M). Considerando la visión de
 MT M calculadora, sólo cuando M se detiene en un estado q $\in$ F debe tenerse en cuenta
 el contenido final de la cinta, es decir la cadena de salida (o simplemente la salida).
@@ -52,6 +54,7 @@ la conjetura conocida como Tesis de Church-Turing, indica que todo lo computable
 cabo por una máquina de Turing
 
 \item \textbf{¿Cuándo dos MT son equivalentes? ¿Cuándo dos modelos de MT son equivalentes?}
+
 Dos máquinas de turing son equivalentes cuando reconocen el mismo lenguaje. Dos modelos de
 máquina de turing son equivalentes cuando poseen el mismo poder de cómputo, es decir a partir de una
 se puede simular la otra y viceversa.
@@ -133,6 +136,8 @@ validar cualquier input perteneciente al $\emptyset$ . Luego, el mismo será rec
 No necesariamente. Si esto sucediera, todos los lenguajes pertenecerían a R. 
 Por ejemplo, HP no pertenece a R y esta incluido en $\sum^*$
 
+
+
 \item \textbf{Justificar por qué un lenguaje finito es recursivo.}
 
 Sea L un lenguaje finito, sabemos que L es un conjunto recursivamente enumerable
@@ -163,25 +168,63 @@ MT M que reconozca su union, es decir:
 
 \begin{enumerate}
 
-    \item \textbf{ Obtener el lenguaje $\sum^*$ y el conjunto de partes del subconjunto de $\sum^*$ con cadenas de a lo
-sumo dos símbolos. ¿Cuál es el cardinal (o tamaño) de este último conjunto?  }
+\item \textbf{ Obtener el lenguaje $\sum^*$ y el conjunto de partes del subconjunto de $\sum^*$ con 
+cadenas de a lo sumo dos símbolos. ¿Cuál es el cardinal (o tamaño) de este último conjunto?  }
 
-\item \textbf{Dado el lenguaje $L = {a^n b^n c^n | n \geq 0}$, 
-obtener la intersección 
-$\sum^* \cap$ L, la unión $\sum^* \cup$ L, el
-complemento de L respecto de $\sum^*$, 
+    $\sum = \{ a, b , c \}$\\
+    $\sum^*$ es todos los strings compuestos por combinaciones de a , b , y c .\\
+    P(A) = \{ w $\in \sum^*$  / w no tenga más de 2 caracteres \}\\
+    P (A) son los conjuntos con todos los subconjuntos posibles de A\\
+    \textbar A\textbar = 13 , \textbar P(A)\textbar = $2^13$
+
+\item \textbf{Dado el lenguaje $L = {a^n b^n c^n | n \geq 0}$, obtener la intersección 
+$\sum^* \cap$ L, la unión $\sum^* \cup$ L, el complemento de L respecto de $\sum^*$, 
 y la concatenación $\sum^*$ . L.}
 
+$L \cap \sum^* = L \Leftrightarrow L \subseteq \sum^*$\\
+$L \cup \sum^* = \sum^*$\\
+$L^C$ con respecto a $\sum^*$ = conjunto de strings tal que no cumplen la forma $a^n b^n c^n$ con n $\geq$ 0 y
+pertenecientes a $\sum^*$\\
+$\sum$ . L = \{ aw, bw, cw \textbar w $\in$ L\}
 \end{enumerate}
 
 \item \textbf{ Construir una MT (puede tener varias cintas) que acepte de la manera más eficiente
 posible el lenguaje $L = \{a^n b^n c^n | n \geq 0\}$. Plantear primero la idea general.}
 
+Ir avanzando en el string de entrada mientras sean “a”, y agregar en la 2nda cinta un marcador
+por cada a. Una vez que se encuentra un carácter que no sea una “a” en la 1er cinta, seguir avanzando
+si son “b”, y retroceder en la cinta 2. Cuando terminan las “b” en la 1er cinta, se tiene que estar al
+principio de la 2nda nuevamente. Avanzar nuevamente en las 2 cintas mientras que sean “c” en la 1era
+hasta que ambas encuentren blanco.\\
+$M = ( Q,\sum  ,\Gamma , \delta , q_0 , q_A , q_R )$\\
+$Q = \{ q_1 , q_2 , q_3 , q_0 , q_A , q_R \}$\\
+$\sum = \{ a, b \}$\\
+$\Gamma= \{ a, b , x \}$\\
+$\delta (q_0 , a , B ) = ( q_1 , ( a, R ), ( x, R ))$\\
+$\delta (q_1 , b , B ) = ( q_2 , ( b, S ), ( B, I ))$\\
+$\delta (q_2 , b , x ) = ( q_2 , ( b, R ), ( x, I ))$\\
+$\delta (q_2 , c , B ) = ( q_3 , ( c, S ), ( B, R ))$\\
+$\delta (q_3 , c , x ) = ( q_3 , ( c, R ), ( x, R ))$\\
+$\delta (q_3 , B , B ) = ( q_A , ( B, S ), ( B, S ))$\\
+Esta máquina recorre sólo una vez el input dado, siendo así la más eficiente para la tarea dada.
+
 \item \textbf{Explicar (informal pero claramente) cómo simular una MT por otra que en un paso
 no pueda simultáneamente modificar un símbolo y moverse.}
 
+Una MT normal tiene el movimiento Static, por lo que simular una máquina que no puede
+simultáneamente moverse y escribir un carácter se hace simplemente usando un movimiento S cuando
+se quiere modificar el carácter, y luego moverse sin modificar el carácter (porque ya estaba actualizado).
+Al poder simular el movimiento Static ya las máquinas serían equivalentes ya que comparten todos los
+otros movimientos y deltas posibles.
+
 \item \textbf{Explicar (informal pero claramente) cómo simular una MT por otra que no tenga el
 movimiento S (es decir el no movimiento).}
+
+Para simular una MT por otra que no tenga el
+movimiento S, el mismo se podria simular haciendo que cuando 
+modifica y se mueva(por ejemplo hacia la derecha), 
+en el siguiente paso haga un movimiento hacia atras(siguiendo el 
+ejemplo anterior, seria hacia la izquierda).
 
 \item \textbf{Sea USAT el lenguaje de las fórmulas booleanas satisfactibles con exactamente una
 asignación de valores de verdad. P.ej. $x_1 \wedge x_2$ pertenece a USAT, mientras que $(x_1 \wedge x_2) \vee x_3$ no.
@@ -197,6 +240,12 @@ y si A’ la satisface, rechaza.}
 \textbf{Ayuda: Considerar p.ej. el caso en que la fórmula tiene dos asignaciones que la satisfacen.
 }
 
+
+Acepta USAT, en el paso 1 se asegura que sea una fórmula sintácticamente correcta, en el paso
+2 se asegura que sea satisfacible, pues al generar no deterministicamente las asignaciones A las genera
+a todas. En el paso 3 se asegura que no hay 2 asignaciones que den verdadero, por lo tanto la MTN
+acepta USAT.
+
 \item \textbf{Considerando el Lema 4 estudiado en la Clase Teórica 2 $(R = RE \cap CO-RE)$:}
 
 \begin{enumerate}
@@ -210,7 +259,21 @@ que también es recursivamente numerable el lenguaje L = \{x $\mid$ x es un núm
 representado en notación unaria, y existen y, z, tales que y + z = x, con y $\in L_1$, z $\in L_2$\}.\\}
 \textbf{Ayuda: la prueba es similar a la de la clausura de RE con respecto a la concatenación. }
  
-\item \textbf{ Dada una MT M1 con $\sum$ = }
+$L_1 \in RE \wedge L_2 \in RE$ , entonces $ \exists MT_1$ y $MT_2$ tal que acepten a $L_1$ y $L_2$ respectivamente. Por
+definición de $L_1$ y $L_2$ , ambos lenguajes están formados por cadenas de números naturales unarios (es
+decir que son representados por cadenas de “1”).\\
+$L = \{ x / x es un natural unario \wedge \exists y, z tal que x = y + z \}$\\
+
+Para que L $\in$ RE tiene que ocurrir que $\exists MT_L$ que acepte a L .\\
+Para cualquier entrada w el string se puede dividir en 2 partes (sin importar el largo de w ,
+siempre serán cantidades finitas de combinaciones), lo que dejaría a w separado en 2 strings, y correr la
+$MT_1$ sobre la 1er parte y la $MT_2$ sobre la 2nda. Como $L_1$ y $L_2$ pertenecen a RE dichas máquinas
+podrían no parar nunca, por lo que se debe hacer hasta k pasos con todas las combinaciones posibles,
+haciendo correr las máquinas k pasos para cada división posible del string, luego k+1 pasos y así
+siguiendo para asegurar encontrar la combinación correcta, buscando el caso en donde ambas acepten
+su parte. De esta manera la $MT_L$ aceptara solo si ambos aceptan, y en cualquier otro caso rechazará.
+
+\item \textbf{ Dada una MT M1 con $\sum$ = \{0,1\} }
 
 \begin{enumerate}
 \item \textbf{ Construir una MT $M_2$ que determine si L($M_1$) tiene al menos una cadena.}
