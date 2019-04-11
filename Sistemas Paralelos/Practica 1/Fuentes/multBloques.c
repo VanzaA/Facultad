@@ -101,13 +101,17 @@ void producto(double *A,double *B,double *C, int r,int N,int sizeMatrix, int siz
 	for (I=0;I<N;I++){
 		for (J=0;J<N;J++){
 			despC = (I*N+J)*sizeBlock;
-			for (K=0;K<N;K++){
+			
+      for (K=0;K<N;K++){
 				despA = (I*N+K)*sizeBlock;
 				despB = (K*N+J)*sizeBlock;
-				for (i=0;i<r;i++){
-					for (j=0;j<r;j++){
+				
+        for (i=0;i<r;i++){
+					
+          for (j=0;j<r;j++){
 						desp = despC + i*r+j;
-						for (k=0;k<r;k++){
+						
+            for (k=0;k<r;k++){
 							C[desp] += A[despA + i*r+k]*B[despB + k*r+j]; 
 						};
 					}

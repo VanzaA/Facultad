@@ -99,15 +99,20 @@ void producto(double *A,double *B,double *C, int r,int N,int sizeMatrix, int siz
 	  C[i]=0.0;
  
 	for (I=0;I<N;I++){
-		for (J=0;J<N;J++){
+		
+    for (J=0;J<N;J++){
 			despC = (I*N+J)*sizeBlock;
-			for (K=0;K<N;K++){
+			
+      for (K=0;K<N;K++){
 				despA = (I*N+K)*sizeBlock;
 				despB = (K*N+J)*sizeBlock;
-				for (i=0;i<r;i++){
-					for (j=0;j<r;j++){
+			
+      	for (i=0;i<r;i++){
+				
+        	for (j=0;j<r;j++){
 						desp = despC + i*r+j;
-						for (k=0;k<r;k++){
+					
+          	for (k=0;k<r;k++){
 							C[desp] += A[despA + i*r+k]*B[despB + k*r+j]; 
 						};
 					}
@@ -158,22 +163,19 @@ void imprimeMatriz(double *S,int N,int r){
 // Imprime la matriz pasada por parametro
 // N es la cantidad de bloques, r dimension de cada bloque
   int i,j,I,J,despB;
-
   printf("Contenido de la matriz: \n" );
-  for (I= 0; I< N; I++){
+  for (I=0; I<N; I++){
     //para cada fila de bloques (I)
-    for (i= 0; i< r; i++){
-       for(J=0;J<N;J++){
-		   despB=(I*N+J)*r*r;
-	  for (j=0;j<r;j++){
-	     printf("%f ",S[despB+ i*r+j]);
-	
-	   };//end for j
-	};//end for J
+    for (i=0; i<r;i++){
+      for(J=0; J<N;J++){
+		    despB=(I*N+J)*r*r;
+	      for (j=0; j<r; j++){
+	        printf("%f ",S[despB+ i*r+j]);
+	      }//end for j
+	    }//end for J
         printf("\n ");
-     };//end for i
-
-  };//end for I
+    }//end for i
+  }//end for I
   printf(" \n\n");
 }
 
