@@ -70,4 +70,58 @@ El comportamiento básico es conocido como overlay. No crea un nuevo proceso, po
 ### 6. Investigue la system call wait:
 
 1. ¿Para qué sirve?
+
+    esta llamada al sistema se usa para esperar los cambios de estado en un hijo del proceso de llamada, y Obtener información sobre el hijo cuyo estado ha cambiado. Un cambio de estado es considerado como: el hijo termino ;el hijo fue detenido por una señal; o el hijo fue reanudado por una señal. En el caso de un hijo terminado, realizar una espera permite al sistema liberar los recursos asociados con el hijo; Si no se realiza una espera, el hijo terminado permanece en un estado "zombie"
+
 2. Sin ella, ¿qué sucedería, pensando en la implementación de la shell?
+
+    Sin el wait no se podría esperar a que una línea de comando termine de ejecutarse para poder recibir la siguiente.
+
+# Redes y Sistemas Operativos
+**En esta sección se aprenderá cómo integrar conceptos del sistema operativo, como redirecciones y pipes, con una red TCP/IP. Para ello se utilizará principalmente la herramienta netcat, también conocida como nc. Investigue su funcionamiento y resuelva. Tip: man nc**
+
+### 1. La herramienta netcat provee una forma sencilla de establecer una conexión TCP/IP. En una terminal levante una sesión de netcat en modo servidor, que escuche en la IP 127.0.0.1 (localhost) en un puerto a elección. En otra terminal conéctese, también vía netcat, al servidor recién levantado. Interactúe y experimente con ambas terminales.
+
+- Cliente: nc -l 8999
+- Servidor: nc localhost 8999
+
+### 2. netcat también es bueno al momento de transmitir archivos sobre una red TCP/IP. Utili-zando dos terminales como se hizo en el ejercicio anterior, transmita el archivo /etc/passwd desde una sesión de netcat hacia la otra.
+__Tip: recordar pipes y redirecciones.__
+
+- Cliente: nc -l 8999 < /etc/passwd
+- Servidor: nc localhost 8999
+
+### 3. Desarrolle un script que reciba en su entrada estándar una lista de hosts e imprima en su salida estándar únicamente aquellos que tienen el puerto 80 abierto. Cuando un host no tiene el puerto 80 abierto, netcat tardará varios segundos en determinar que la conexión no se puede establecer.
+__Tip: utilizar la opción -w de netcat para disminuir el tiempo de timeout.__
+### 4. Desarrolle un script que reciba en su entrada estándar una lista de hosts con el puerto 80 abierto y, para cada uno, realice un requerimiento HTTP GET a la URI raíz y devuelva el valor del campo Content-Length de la respuesta. Deberá ser posible utilizar como entrada estándar la salida estándar del script anterior. 
+
+**echo** www.google.com www.debian.org www.linti.unlp.edu.ar | ./cl.sh 
+
+www.google.com: 262 
+
+www.debian.org: 470 
+
+www.linti.unlp.edu.ar: 223 
+
+__Tip: printf "GET / HTTP/1.0\r\n\r\n"| ...__
+
+### 5. Interprete y describa qué es lo que hace el siguiente fragmento de código extraído de la man page de netcat. 
+
+$ rm −f /tmp/f; mkfifo /tmp/f
+
+$ cat /tmp/f | /bin/sh −i 2>&1 | nc −l 127.0.0.1 1234 > /tmp/f
+
+__Tip: man mkfifo__
+
+### 6. Desarrolle un script que permita al usuario chatear con otra instancia del mismo script. Para ello, el script deberá recibir como parámetro si va a funcionar como (c)liente o como (s)ervidor. También deberá recibir como parámetro un nickname para el usuario. Por ejemplo, para invocar el script en modo servidor con el nick jvg, debería ejecutar:
+
+**./nc−chat.sh s jvg**
+
+Además, los mensajes transmitidos deben comenzar con la fecha, hora y nick del emisor.
+Por ejemplo:
+
+
+Thu Mar 12 13:03:14 ART 2015, jvg 
+says:
+
+Knock knock Neo.
