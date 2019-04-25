@@ -1,14 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/time.h>
-#include <pthread.h>
 
-int N;
-int thread_number;
-int block_size;
-double *A; // Matriz A
-double *B; // Matriz B
-double *C; // Matriz C
 
 double dwalltime()
 {
@@ -20,27 +13,7 @@ double dwalltime()
   return sec;
 }
 
-void* mult(void* arg)
-{
-  int id = *((int*)arg);
-  int start = id * block_size;
-  int limit = (id + 1) * block_size;
-
-
-  for(int i = start; i < limit; i++){
-    for(int j = 0; j < N; j++){
-      int aux = 0;
-      for(int k = 0; k < N; k++){
-        aux += A[i*N+k] * B[k+j*N];
-      }
-      C[i*N+j] = aux;
-    }
-  }
-  pthread_exit(0);
-  return 0;
-}
-
-void print_matrix(double *matrix)
+void print_matrix(double *matrix, int N)
 {
   for (int i = 0; i < N; i++) {
     for(int j = 0; j < N; j++) {
@@ -53,9 +26,9 @@ void print_matrix(double *matrix)
 int main(int argc, char* argv[])
 {
   // Check arguments
-  if (argc < 3)
+  if (argc < 2)
   {
-    printf("You must specify:\n\t- thread number\n\t- matrix size\n");
+    printf("You must specify:\n\t- matrix size\n");
     exit(1);
   }
 
@@ -63,10 +36,10 @@ int main(int argc, char* argv[])
   // Initialize variable
   double initial_time;
   int check = 1;
-  thread_number = atoi(argv[1]);
-  N = atoi(argv[2]);
-  block_size = N / thread_number;
-  int ids[thread_number];
+  int N = atoi(argv[1]);;
+  double *A; // Matriz A
+  double *B; // Matriz B
+  double *C; // Matriz C
   
   // Alloc matrix A, B and C
   A = (double*)malloc(sizeof(double)*N*N);
@@ -81,31 +54,28 @@ int main(int argc, char* argv[])
     }
   }   
 
-  // Threads declaration
-  pthread_t threads[thread_number];
-
   //Start processor time
   initial_time = dwalltime();
 
-  // Run threads
-  for(int i = 0; i < thread_number; i++){
-    ids[i]= i;
-    pthread_create(&threads[i], NULL, mult, &ids[i]);
-  }   
-
-  // Wait for all threads
-  for(int i = 0; i < thread_number; i++){
-    pthread_join(threads[i], NULL);
+  for(int i = 0; i < N; i++){
+    for(int j = 0; j < N; j++){
+      int aux = 0;
+      for(int k = 0; k < N; k++){
+        aux += A[i*N+k] * B[k+j*N];
+      }
+      C[i*N+j] = aux;
+    }
   }
 
   printf("Time %g\n", dwalltime() - initial_time);
 
-  // Verify result
+  //Verifica el resultado
   for(int i = 0; i < N; i++){
     for(int j = 0; j < N; j++){
       check = check && (C[i*N+j] == N);
     }
   }
+
 
   free(A);
   free(B);
