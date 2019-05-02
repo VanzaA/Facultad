@@ -3,13 +3,13 @@
 #include <sys/time.h>
 
 int N;
-int *A, *B, *C, *D, *total;
+double *A, *B, *C, *D, *total;
 
 
-void  printMatrix(int *matrix){
+void  printMatrix(double *matrix){
 	for(int i = 0; i < N; i++){
 		for(int j = 0; j < N; j++){
-			printf(" %d ", matrix[i * N + j]);
+			printf(" %f ", matrix[i * N + j]);
 		}
 		printf("\n");
 	}
@@ -32,17 +32,17 @@ int main(int argc, char * argv[]){
 		printf("You must specify:\n\t- matrix size\n");
 		exit(1);
 	}
-	int aux1, aux2, aux3;
+	double aux1, aux2, aux3;
 
 	//numThreads = atoi(argv[1]);
 	N = atoi(argv[1]);
 
 
-	A = (int*)malloc(sizeof(int)*N*N);
-	B = (int*)malloc(sizeof(int)*N*N);
-	C = (int*)malloc(sizeof(int)*N*N);
-	D = (int*)malloc(sizeof(int)*N*N);
-	total = (int*)malloc(sizeof(int)*N*N);
+	A = (double*)malloc(sizeof(double)*N*N);
+	B = (double*)malloc(sizeof(double)*N*N);
+	C = (double*)malloc(sizeof(double)*N*N);
+	D = (double*)malloc(sizeof(double)*N*N);
+	total = (double*)malloc(sizeof(double)*N*N);
 
 	int i, j;
 
@@ -56,16 +56,16 @@ int main(int argc, char * argv[]){
 	}
 	double timetick = dwalltime();
 	for (i = 0; i < N; i++){
-		for(int k = 0; k < N; k++){
+		for(j = 0; j < N; j++){
 			aux1 = 0;
 			aux2 = 0;
 			aux3 = 0;
-			for(j = 0; j < N; j++){
-				aux1 += A[i * N + j] * A[j + k * N];
-				aux2 += A[i * N + j] * B[j + k * N];
-				aux3 += C[i * N + j] * D[j + k * N];
+			for(int k = 0; k < N; k++){
+				aux1 += A[i * N + k] * A[k + j * N];
+				aux2 += A[i * N + k] * B[k + j * N];
+				aux3 += C[i * N + k] * D[k + j * N];
 			}
-			total[i * N + k] = aux1 + aux2 + aux3;
+			total[i * N + j] = aux1 + aux2 + aux3;
 		}
 	}
 
