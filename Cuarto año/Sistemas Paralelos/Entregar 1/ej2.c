@@ -48,6 +48,7 @@ void * mul_total_matrix(void *arg){
             matrices[matrix_index][i * N + j] *= total;
         }
     }
+    pthread_exit(NULL);
     return 0;
 }
 
@@ -60,6 +61,7 @@ void * sum_matrix_total(void *arg){
             sum_total[i * N + j] += matrices[matrix_index][i * N + j];
         }
     }
+    pthread_exit(NULL);
     return 0;
 }
 
