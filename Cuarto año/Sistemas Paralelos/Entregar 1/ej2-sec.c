@@ -89,7 +89,6 @@ int main(int argc, char *argv[]){
                 sum_total[i * N + j] += matrices[matrix_index][i * N + j];
             }
         }
-        //printf("matriz numero: %d\nmin: %g  max: %g\n avg: %g\n", matrix_index, min, max, average);
     }
 
     printf("tiempo total: %f\n", dwalltime() - timetick);
@@ -100,6 +99,5 @@ int main(int argc, char *argv[]){
     }
     
     free(sum_total);
-    free(matrices);
     return 0;
 }
