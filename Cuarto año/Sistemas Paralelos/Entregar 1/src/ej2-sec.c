@@ -25,28 +25,35 @@ double dwalltime()
 }
 
 int main(int argc, char *argv[]){
-
     if(argc < 3){
 		printf("You must specify:\n\t- matrix number\n\t- matrix size\n");
 		exit(1);
 	}
+
+    #ifdef DEBUG
+    int debug = 0;
+    if (getenv("DEBUG")) {
+        debug = atoi(getenv("DEBUG"));
+        printf(ANSI_COLOR_RED "Debug mode - Level %d\n" ANSI_COLOR_RESET, debug);
+    }  else {
+        printf(ANSI_COLOR_YELLOW "Debug binary\nSet DEBUG environment variable with a level\n" ANSI_COLOR_RESET);
+    }
+    #endif
    
     int m = atoi(argv[1]);
     int N = atoi(argv[2]);
     double *matrices[m];
     double *sum_total;
     int matrix_size = N * N;
-    double max;
-    double min;
-    double average, total;
+    double max, min, average, total;
  
-    //asigno memoria
+    // Memory initialize
     for (int i = 0; i < m; i++){
         matrices[i] = (double*)malloc(sizeof(double) * N * N); 
     }
     sum_total = (double*)malloc(sizeof(double) * N * N);
 
-    //inicializo matrices
+    // Matrix initialize
     for (int matrix_index = 0; matrix_index < m; matrix_index++){
         for(int i = 0; i < N; i++){
             for(int j = 0; j < N; j++){
@@ -59,8 +66,21 @@ int main(int argc, char *argv[]){
         for(int j = 0; j < N; j++){
             sum_total[i * N + j] = 0; 
         }
-    } 
+    }
+
+    #ifdef DEBUG
+    if (debug > 2) {
+        for (int matrix_index = 0; matrix_index < m; matrix_index++) {
+            printf("Initial matrix %d\n", matrix_index);
+            print_matrix(matrices[matrix_index], N);
+        }
+        printf("Initial sum_total matrix\n");
+        print_matrix(sum_total, N);
+    }
+    #endif
+
     double timetick = dwalltime();
+
     for (int matrix_index = 0; matrix_index < m; matrix_index++){
         max = FLT_MIN;
         min = FLT_MAX;
@@ -89,6 +109,10 @@ int main(int argc, char *argv[]){
                 sum_total[i * N + j] += matrices[matrix_index][i * N + j];
             }
         }
+
+        #ifdef DEBUG
+        printf("Matrix number: %d\nmin: %g  max: %g\n avg: %g\n", matrix_index, min, max, average);
+        #endif
     }
 
     printf("tiempo total: %f\n", dwalltime() - timetick);
