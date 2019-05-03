@@ -33,24 +33,24 @@ int main(int argc, char *argv[]){
    
     int m = atoi(argv[1]);
     int N = atoi(argv[2]);
-    float *matrices[m];
-    float *sum_total;
+    double *matrices[m];
+    double *sum_total;
     int matrix_size = N * N;
-    float max;
-    float min;
-    float average, total;
+    double max;
+    double min;
+    double average, total;
  
     //asigno memoria
     for (int i = 0; i < m; i++){
-        matrices[i] = (float*)malloc(sizeof(float) * N * N); 
+        matrices[i] = (double*)malloc(sizeof(double) * N * N); 
     }
-    sum_total = (float*)malloc(sizeof(float) * N * N);
+    sum_total = (double*)malloc(sizeof(double) * N * N);
 
     //inicializo matrices
     for (int matrix_index = 0; matrix_index < m; matrix_index++){
         for(int i = 0; i < N; i++){
             for(int j = 0; j < N; j++){
-                matrices[matrix_index][i * N + j] = rand()%10; 
+                matrices[matrix_index][i * N + j] = 1; 
             }
         }
     }
@@ -94,5 +94,12 @@ int main(int argc, char *argv[]){
 
     printf("tiempo total: %f\n", dwalltime() - timetick);
 
+    
+    for (int i = 0; i < m; i++){
+        free(matrices[i]); 
+    }
+    
+    free(sum_total);
+    free(matrices);
     return 0;
 }

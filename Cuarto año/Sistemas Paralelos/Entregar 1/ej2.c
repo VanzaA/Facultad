@@ -4,68 +4,10 @@
 #include <float.h>
 #include <pthread.h>
 
-int m, N, matrix_index, thread_number;
+int m, N, thread_number;
 double **matrices;
 double *sum_total;
-double total, min, max, average;
 pthread_mutex_t lock;
-
-void* min_max_average(void *arg){
-    
-    int tid = *(int*)arg;
-    double local_max = FLT_MIN;
-    double local_min = FLT_MAX;
-    double local_average = 0.0; 
-    int start = ((N * N) / thread_number * tid);
-    int end = ((N * N) / thread_number * (tid + 1));
-
-    for(int i = start; i < end; i++){
-        for(int j = 0; j < N; j++){
-            local_average += matrices[matrix_index][i * N + j];
-            if (matrices[matrix_index][i * N + j] < local_min) {
-                local_min = matrices[matrix_index][i * N + j];
-            }
-            if (matrices[matrix_index][i * N + j] > local_max) {
-                local_max = matrices[matrix_index][i * N + j];
-            } 
-        }
-    }
-
-    pthread_mutex_lock(&lock);
-    average += local_average;
-    min = min < local_min ? min : local_min;
-    max = max > local_max ? max : local_max;
-    pthread_mutex_unlock(&lock);
-    pthread_exit(NULL);
-    return 0;
-    }
-
-void * mul_total_matrix(void *arg){
-    int tid = *(int*)arg;
-    int start = ((N * N) / thread_number * tid);
-    int end = ((N * N) / thread_number * (tid + 1));
-    for(int i = start; i < end; i++){
-        for(int j = 0; j < N; j++){
-            matrices[matrix_index][i * N + j] *= total;
-        }
-    }
-    pthread_exit(NULL);
-    return 0;
-}
-
-void * sum_matrix_total(void *arg){
-    int tid = *(int*)arg;
-    int start = ((N * N) / thread_number * tid);
-    int end = ((N * N) / thread_number * (tid + 1));
-    for(int i = start; i < end; i++){
-        for(int j = 0; j < N; j++){
-            sum_total[i * N + j] += matrices[matrix_index][i * N + j];
-        }
-    }
-    pthread_exit(NULL);
-    return 0;
-}
-
 
 void  print_matrix(double *matrix, int N){
 	for(int i = 0; i < N; i++){
@@ -74,12 +16,71 @@ void  print_matrix(double *matrix, int N){
 		}
 		printf("\n\n");
 	}
-	
 }
 
 
-double dwalltime()
-{
+void* summatory_value(void *arg){
+    int tid = *(int *)arg;
+    int start = (m / thread_number) * tid;
+    int limit =  (m / thread_number) * (tid + 1);
+    double max, min, average, division;
+
+    for(int matrix_index = start; matrix_index < limit; matrix_index++){
+        max = DBL_MIN;
+        min = DBL_MAX;
+        average = 0.0; 
+
+        for(int i = 0; i < N; i++){
+            for(int j = 0; j < N; j++){
+                average += matrices[matrix_index][i * N + j];
+                if (matrices[matrix_index][i * N + j] < min) {
+                    min = matrices[matrix_index][i * N + j];
+                }
+                if (matrices[matrix_index][i * N + j] > max) {
+                    max = matrices[matrix_index][i * N + j];
+                }
+            }
+        }
+        average = average / (N * N);
+        division = (max - min) / average;
+        for(int i = 0; i < N; i++){
+            for(int j = 0; j < N; j++){
+                matrices[matrix_index][i * N + j] *= division;
+            }
+        }
+    }
+    pthread_exit(NULL);
+    return 0;
+}
+
+void* summatory_operation(void* arg){
+    int tid = *(int *)arg;
+    int start = (m / thread_number) * tid;
+    int limit =  (m / thread_number) * (tid + 1);
+    double *matrix_aux;
+    
+    matrix_aux = (double*)calloc(N * N, sizeof(double));
+    
+    for(int matrix_index = start; matrix_index < limit; matrix_index++){
+        for(int i = 0; i < N; i++){
+            for(int j = 0; j < N; j++){
+                matrix_aux[i * N + j] += matrices[matrix_index][i * N + j];
+            }
+        }
+    }
+    pthread_mutex_lock(&lock);
+    for(int i = 0; i < N; i++){
+        for(int j = 0; j < N; j++){
+            sum_total[i * N + j] += matrix_aux[i * N + j];
+        }
+    }
+    pthread_mutex_unlock(&lock);
+    free(matrix_aux);
+    pthread_exit(0);
+    return 0;
+}
+
+double dwalltime(){
   double sec;
   struct timeval tv;
 
@@ -103,7 +104,7 @@ int main(int argc, char *argv[]){
  
     //asigno memoria
     for (int i = 0; i < m; i++){
-        matrices[i] = (double*)malloc(sizeof(double) * N * N); 
+        matrices[i] = (double*)malloc(sizeof(double) * N * N);
     }
     sum_total = (double*)malloc(sizeof(double) * N * N);
 
@@ -111,7 +112,7 @@ int main(int argc, char *argv[]){
     for (int matrix_index = 0; matrix_index < m; matrix_index++){
         for(int i = 0; i < N; i++){
             for(int j = 0; j < N; j++){
-                matrices[matrix_index][i * N + j] = rand()%10; 
+                matrices[matrix_index][i * N + j] = 1; 
             }
         }
     }
@@ -128,48 +129,34 @@ int main(int argc, char *argv[]){
 
     // Start processor time
      double timetick = dwalltime();
-    for (matrix_index = 0; matrix_index < m; matrix_index++){
-        min = FLT_MAX;
-        max = FLT_MIN;
-        average = 0;
-        for (int i = 0; i < thread_number; i++) {
-            ids[i] = i;
-            pthread_create(&threads[i], NULL, min_max_average, &ids[i]);
-        }
 
-        // Wait for all threads
-        for (int i = 0; i < thread_number; i++) {
-            pthread_join(threads[i], NULL);
-        }
-        printf("matriz numero: %d\nmin: %g  max: %g\n avg: %g\n", matrix_index, min, max, average);
-
-        
-        /*for (int i = 0; i < thread_number; i++) {
-            ids[i] = i;
-            pthread_create(&threads[i], NULL, mul_total_matrix, &ids[i]);
-        }
-
-        // Wait for all threads
-        for (int i = 0; i < thread_number; i++) {
-            pthread_join(threads[i], NULL);
-        }
-        for (int i = 0; i < thread_number; i++) {
-            ids[i] = i;
-            pthread_create(&threads[i], NULL, sum_matrix_total, &ids[i]);
-        }
-
-        // Wait for all threads
-        for (int i = 0; i < thread_number; i++) {
-            pthread_join(threads[i], NULL);
-        } 
-        */ 
+    for (int i = 0; i < thread_number; i++) {
+        ids[i] = i;
+        pthread_create(&threads[i], NULL, summatory_value, &ids[i]);
     }
 
+        // Wait for all threads
+    for (int i = 0; i < thread_number; i++) {
+        pthread_join(threads[i], NULL);
+    }
+    
+    for (int i = 0; i < thread_number; i++) {
+        ids[i] = i;
+        pthread_create(&threads[i], NULL, summatory_operation, &ids[i]);
+    }
+
+        // Wait for all threads
+    for (int i = 0; i < thread_number; i++) {
+        pthread_join(threads[i], NULL);
+    }
+    
         
     printf("tiempo total: %f\n", dwalltime() - timetick);
-     for (int i = 0; i < m; i++){
+    
+    for (int i = 0; i < m; i++){
         free(matrices[i]); 
     }
+    
     free(sum_total);
     free(matrices);
     return 0;
