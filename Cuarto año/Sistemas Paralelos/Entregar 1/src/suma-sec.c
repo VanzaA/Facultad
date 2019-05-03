@@ -2,14 +2,14 @@
 #include <stdlib.h>
 #include <sys/time.h>
 
-int N;
-double *A, *B, *C, *D, *total;
+#define ANSI_COLOR_RED "\x1b[31m"
+#define ANSI_COLOR_YELLOW "\x1b[33m"
+#define ANSI_COLOR_RESET "\x1b[0m"
 
-
-void  printMatrix(double *matrix){
+void print_matrix(double *matrix, int N){
 	for(int i = 0; i < N; i++){
 		for(int j = 0; j < N; j++){
-			printf(" %f ", matrix[i * N + j]);
+			printf(" %g ", matrix[i * N + j]);
 		}
 		printf("\n");
 	}
@@ -32,19 +32,32 @@ int main(int argc, char * argv[]){
 		printf("You must specify:\n\t- matrix size\n");
 		exit(1);
 	}
+
+	#ifdef DEBUG
+	int debug = 0;
+	if (getenv("DEBUG")) {
+			debug = atoi(getenv("DEBUG"));
+			printf(ANSI_COLOR_RED "Debug mode - Level %d\n" ANSI_COLOR_RESET, debug);
+	}  else {
+			printf(ANSI_COLOR_YELLOW "Debug binary\nSet DEBUG environment variable with a level\n" ANSI_COLOR_RESET);
+	}
+	#endif
+
+	int i, j, N = atoi(argv[1]), check = 1;
+	double *A, *B, *C, *D, *total;
 	double aux1, aux2, aux3;
 
-	//numThreads = atoi(argv[1]);
-	N = atoi(argv[1]);
+	#ifdef DEBUG
+	if (debug > 1) {
+		printf("N: %d\n\n", N);
+	}
+	#endif
 
-
-	A = (double*)malloc(sizeof(double)*N*N);
-	B = (double*)malloc(sizeof(double)*N*N);
-	C = (double*)malloc(sizeof(double)*N*N);
-	D = (double*)malloc(sizeof(double)*N*N);
-	total = (double*)malloc(sizeof(double)*N*N);
-
-	int i, j;
+	A = (double*)malloc(sizeof(double) * N * N);
+	B = (double*)malloc(sizeof(double) * N * N);
+	C = (double*)malloc(sizeof(double) * N * N);
+	D = (double*)malloc(sizeof(double) * N * N);
+	total = (double*)malloc(sizeof(double) * N * N);
 
 	for(i = 0; i < N; i++){
 		for(j = 0; j < N; j++){
@@ -54,12 +67,26 @@ int main(int argc, char * argv[]){
 			D[i * N + j] = 1;
 		}
 	}
+
+	#ifdef DEBUG
+	if (debug > 0) {
+		printf("Initial matrix A\n");
+		print_matrix(A, N);
+		printf("Initial matrix B\n");
+		print_matrix(B, N);
+		printf("Initial matrix C\n");
+		print_matrix(C, N);
+		printf("Initial matrix D\n");
+		print_matrix(D, N);
+		printf("\n\n");
+	}
+	#endif
+
 	double timetick = dwalltime();
+
 	for (i = 0; i < N; i++){
 		for(j = 0; j < N; j++){
-			aux1 = 0;
-			aux2 = 0;
-			aux3 = 0;
+			aux1 = 0, aux2 = 0, aux3 = 0;
 			for(int k = 0; k < N; k++){
 				aux1 += A[i * N + k] * A[k + j * N];
 				aux2 += A[i * N + k] * B[k + j * N];
@@ -70,18 +97,25 @@ int main(int argc, char * argv[]){
 	}
 
 	printf("tiempo total %f\n", dwalltime() - timetick);
-	int check = 1;
+
 	for(i = 0; i < N; i++){
 		for(j = 0; j < N; j++){
 			check = check && (total[i * N + j] == (N*3));
 		}
 	}
 	if(!check){
-    		printf("Sum error!\n");
-    		return 2;
-  	}
+		printf("Sum error!\n");
+		return 2;
+	}
 
-  	printf("Everything it's ok!\n");
+	printf("Everything it's ok!\n");
 	
+	#ifdef DEBUG
+	if (debug > 1) {
+		printf("\n\nFinal matrix A\n");
+		print_matrix(total, N);
+	}
+	#endif
+
 	return 0;
 }

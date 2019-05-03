@@ -17,7 +17,7 @@ double **matrices;
 double *sum_total;
 pthread_mutex_t lock;
 
-void  print_matrix(double *matrix, int N){
+void print_matrix(double *matrix, int N){
 	for(int i = 0; i < N; i++) {
 		for(int j = 0; j < N; j++) {
 			printf(" %g ", matrix[i * N + j]);

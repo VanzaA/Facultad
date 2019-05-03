@@ -3,8 +3,11 @@
 #include <sys/time.h>
 #include <float.h>
 
+#define ANSI_COLOR_RED "\x1b[31m"
+#define ANSI_COLOR_YELLOW "\x1b[33m"
+#define ANSI_COLOR_RESET "\x1b[0m"
 
-void  print_matrix(double *matrix, int N){
+void print_matrix(double *matrix, int N){
 	for(int i = 0; i < N; i++){
 		for(int j = 0; j < N; j++){
 			printf(" %g ", matrix[i * N + j]);
