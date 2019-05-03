@@ -33,18 +33,18 @@ int main(int argc, char *argv[]){
    
     int m = atoi(argv[1]);
     int N = atoi(argv[2]);
-    double *matrices[m];
-    double *sum_total;
+    float *matrices[m];
+    float *sum_total;
     int matrix_size = N * N;
-    double max;
-    double min;
-    double average, total;
+    float max;
+    float min;
+    float average, total;
  
     //asigno memoria
     for (int i = 0; i < m; i++){
-        matrices[i] = (double*)malloc(sizeof(double) * N * N); 
+        matrices[i] = (float*)malloc(sizeof(float) * N * N); 
     }
-    sum_total = (double*)malloc(sizeof(double) * N * N);
+    sum_total = (float*)malloc(sizeof(float) * N * N);
 
     //inicializo matrices
     for (int matrix_index = 0; matrix_index < m; matrix_index++){

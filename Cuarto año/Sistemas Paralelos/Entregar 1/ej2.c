@@ -32,6 +32,7 @@ void* min_max_average(void *arg){
     }
 
     pthread_mutex_lock(&lock);
+    average += local_average;
     min = min < local_min ? min : local_min;
     max = max > local_max ? max : local_max;
     pthread_mutex_unlock(&lock);
@@ -128,6 +129,9 @@ int main(int argc, char *argv[]){
     // Start processor time
      double timetick = dwalltime();
     for (matrix_index = 0; matrix_index < m; matrix_index++){
+        min = FLT_MAX;
+        max = FLT_MIN;
+        average = 0;
         for (int i = 0; i < thread_number; i++) {
             ids[i] = i;
             pthread_create(&threads[i], NULL, min_max_average, &ids[i]);
@@ -137,8 +141,10 @@ int main(int argc, char *argv[]){
         for (int i = 0; i < thread_number; i++) {
             pthread_join(threads[i], NULL);
         }
+        printf("matriz numero: %d\nmin: %g  max: %g\n avg: %g\n", matrix_index, min, max, average);
+
         
-        for (int i = 0; i < thread_number; i++) {
+        /*for (int i = 0; i < thread_number; i++) {
             ids[i] = i;
             pthread_create(&threads[i], NULL, mul_total_matrix, &ids[i]);
         }
@@ -155,8 +161,16 @@ int main(int argc, char *argv[]){
         // Wait for all threads
         for (int i = 0; i < thread_number; i++) {
             pthread_join(threads[i], NULL);
-        }  
+        } 
+        */ 
     }
+
+        
     printf("tiempo total: %f\n", dwalltime() - timetick);
+     for (int i = 0; i < m; i++){
+        free(matrices[i]); 
+    }
+    free(sum_total);
+    free(matrices);
     return 0;
 }
