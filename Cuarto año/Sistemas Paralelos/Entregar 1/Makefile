@@ -4,8 +4,8 @@ SRC_DIR := src
 TEMPLATE_DIR := templates
 BIN_DIR := bin
 MACROS := -D DEBUG
+OPENPM_SOURCES := ej1 ej1-sec
 PTHREAD_SOURCES := ej2 ej2-sec
-OPENPM_SOURCES := suma suma-sec
 PTHREAD_FLAGS := -pthread
 OPENMP_FLAGS := -fopenmp
 
