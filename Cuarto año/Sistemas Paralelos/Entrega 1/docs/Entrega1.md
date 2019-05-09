@@ -36,6 +36,14 @@ Donde `A`, `B`, `C` y `D` son matrices de `NxN`.
 
 ## Solución
 
+### Secuencial
+
+ Dadas las matrices **A, B, C y D** de tamaño N*N, se busca calcular la ecuacion **AA + AB + CD**. Lo primero es calcular los valores de las matricez **AA, AB, CD** en los indices `i`,`j` siendo estas __AA = A[i,j] * A[i,j] --- AB = A[i,j] * B[i,j] --- CD = C[i,j] * D[i,j]__ utilizando una multiplicacion normal de matrices, y antes de aumentar el indice se suman los valores obtenidos anteriormente y se asignan en la matriz **TOTAL** en la misma posicion `i`,`j`, osea, __TOTAL[i,j] = AA + AB + CD__
+
+### OpenMP
+
+Se engloba el bloque a paralelizar bajo la primitiva _parallel_, se utiliza la primitiva _for_ en los bloques iterativos para que se reparta la cantidad de trabajo entre los hilos y por ultimo la primitiva _private_ asignandole a cada hilo sus propios indices y auxiliares para realizar las cuentas.
+
 ## Tiempos
 
 | Tamaño | Tiempo Secuencial | Tiempo 2 Threads | Tiempo 4 Threads |
