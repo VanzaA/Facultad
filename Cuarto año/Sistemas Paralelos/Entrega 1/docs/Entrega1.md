@@ -46,7 +46,7 @@ Se engloba el bloque a paralelizar bajo la primitiva _parallel_, se utiliza la p
 
 ## Tiempos
 
-| Tamaño | Tiempo Secuencial | Tiempo 2 Threads | Tiempo 4 Threads |
+| Tamaño | Tiempo Secuencial | Tiempo 2 Hilos | Tiempo 4 Hilos |
 |--------|-------------------|------------------|------------------|
 |   512  |     1,157355      |     0,633085     |     0,327391     |
 |  1024  |     9,367766      |     5,134782     |     2,773294     |
@@ -54,7 +54,7 @@ Se engloba el bloque a paralelizar bajo la primitiva _parallel_, se utiliza la p
 
 ### Speedup
 
-| Tamaño | S<sub>p</sub> 2 Threads | S<sub>p</sub> 4 Threads |
+| Tamaño | S<sub>p</sub> 2 Hilos | S<sub>p</sub> 4 Hilos |
 |--------|-------------------------|-------------------------|
 |   512  |       1,828119447       |       3,53508496        |
 |  1024  |       1,824374628       |       3,377848147       |
@@ -62,13 +62,15 @@ Se engloba el bloque a paralelizar bajo la primitiva _parallel_, se utiliza la p
 
 ### Eficiencia
 
-| Tamaño | E<sub>p</sub> 2 Threads | E<sub>p</sub> 4 Threads |
+| Tamaño | E<sub>p</sub> 2 Hilos | E<sub>p</sub> 4 Hilos |
 |--------|-------------------------|-------------------------|
 |   512  |       0,914059735       |       0,88377124        |
 |  1024  |       0,912187314       |       0,844462037       |
 |  2048  |       0,921479178       |       0,866936679       |
 
 ## Conclusiones
+
+Al no haber dependencia de datos entre Hilos dado que cado uno calcula una cantidad de posiciones y solo dependen de las matrices A,B,C y D que estas no son modificadas, no difieren tanto los calculos de eficiencia entre entre 2 y 4 hilos
 
 # Punto 2
 
@@ -94,7 +96,7 @@ Se divide el vector para que cada thread calcule la misma cantidad de matricez. 
 
 ## Tiempos
 
-| Tamaño | Tiempo Secuencial | Tiempo 2 Threads | Tiempo 4 Threads |
+| Tamaño | Tiempo Secuencial | Tiempo 2 Hilos | Tiempo 4 Hilos |
 |--------|-------------------|------------------|------------------|
 |   512  |     0,374618      |     0,197695     |     0,123818     |
 |  1024  |     1,457437      |     0,812408     |     0,550743     |
@@ -102,7 +104,7 @@ Se divide el vector para que cada thread calcule la misma cantidad de matricez. 
 
 ### Speedup
 
-| Tamaño | S<sub>p</sub> 2 Threads | S<sub>p</sub> 4 Threads |
+| Tamaño | S<sub>p</sub> 2 Hilos | S<sub>p</sub> 4 Hilos |
 |--------|-------------------------|-------------------------|
 |   512  |       1,894929057       |       3,025553635       |
 |  1024  |       1,793971798       |       2,64631053        |
@@ -110,10 +112,12 @@ Se divide el vector para que cada thread calcule la misma cantidad de matricez. 
 
 ### Eficiencia
 
-| Tamaño | E<sub>p</sub> 2 Threads | E<sub>p</sub> 4 Threads |
+| Tamaño | E<sub>p</sub> 2 Hilos | E<sub>p</sub> 4 Hilos |
 |--------|-------------------------|-------------------------|
 |   512  |       0,947464528       |       0,756388409       |
 |  1024  |       0,896985874       |       0,661577633       |
 |  2048  |       0,908689083       |       0,671388755       |
 
 ## Conclusiones
+
+No hay dependencia de datos dado que cada hilo calcula __M/hilos__ matrices, pero, al haber una exclusion mutua y al ser una muestra tan chica se nota la diferencia de perfomance entre 2 y 4 hilos , si fuera una muestra mas grande seria como el Ejercicio 1 y seria eficiente tanto para 2 como 4 hilos
