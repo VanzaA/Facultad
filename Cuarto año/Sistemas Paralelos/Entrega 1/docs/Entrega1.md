@@ -32,17 +32,17 @@
 
 > Resolver la siguiente expresión:
 <img class='equation' src='img/punto1.png'>
-Donde `A`, `B`, `C` y `D` son matrices de `NxN`.
+Donde **A**, **B**, **C** y **D** son matrices de **NxN**.
 
 ## Solución
 
 ### Secuencial
 
- Dadas las matrices **A, B, C y D** de tamaño N*N, se busca calcular la ecuacion **AA + AB + CD**. Lo primero es calcular los valores de las matricez **AA, AB, CD** en los indices `i`,`j` siendo estas __AA = A[i,j] * A[i,j] --- AB = A[i,j] * B[i,j] --- CD = C[i,j] * D[i,j]__ utilizando una multiplicacion normal de matrices, y antes de aumentar el indice se suman los valores obtenidos anteriormente y se asignan en la matriz **TOTAL** en la misma posicion `i`,`j`, osea, __TOTAL[i,j] = AA + AB + CD__
+ Dadas las matrices **A, B, C y D** de tamaño **N*N**, se busca calcular la ecuacion **AA + AB + CD**. Lo primero es calcular los valores de las matrices **AA, AB, CD** en los índices **i**, **j** siendo estas __AA = A[i,j] * A[i,j] --- AB = A[i,j] * B[i,j] --- CD = C[i,j] * D[i,j]__ utilizando una multiplicacion normal de matrices, y antes de aumentar el índice se suman los valores obtenidos anteriormente y se asignan en la matriz **TOTAL** en la misma posicion **i**, **j**, o sea, __TOTAL[i,j] = AA + AB + CD__
 
 ### OpenMP
 
-Se engloba el bloque a paralelizar bajo la primitiva _parallel_, se utiliza la primitiva _for_ en los bloques iterativos para que se reparta la cantidad de trabajo entre los hilos y por ultimo la primitiva _private_ asignandole a cada hilo sus propios indices y auxiliares para realizar las cuentas.
+Se engloba el bloque a paralelizar bajo la primitiva _parallel_, se utiliza la primitiva _for_ en los bloques iterativos para que se reparta la cantidad de trabajo entre los hilos y por ultimo la primitiva _private_ asignandole a cada hilo sus propios índices y auxiliares para realizar las cuentas.
 
 ## Tiempos
 
@@ -70,29 +70,28 @@ Se engloba el bloque a paralelizar bajo la primitiva _parallel_, se utiliza la p
 
 ## Conclusiones
 
-Al no haber dependencia de datos entre Hilos dado que cado uno calcula una cantidad de posiciones y solo dependen de las matrices A,B,C y D que estas no son modificadas, no difieren tanto los calculos de eficiencia entre entre 2 y 4 hilos
+Al no haber dependencia de datos entre Hilos dado que cado uno calcula una cantidad de posiciones y solo dependen de las matrices A, B, C y D que estas no son modificadas, no difieren tanto los calculos de eficiencia entre entre 2 y 4 hilos
 
 # Punto 2
 
 > Resolver la siguiente expresión:
 <img class='equation' src='img/punto2.png'>
-Donde M<sub>i</sub> son matrices cuadradas de `NxN`. minM<sub>i</sub> y maxM<sub>i</sub> son el mínimo y el máximo valor de los elementos de la matriz M<sub>i</sub>, respectivamente.
-avgM<sub>i</sub> es el valor promedio de los elementos de la matriz M<sub>i</sub>.
+Donde **M<sub>i</sub>** son matrices cuadradas de **NxN**. **minM<sub>i</sub>** y **maxM<sub>i</sub>** son el mínimo y el máximo valor de los elementos de la matriz **M<sub>i</sub>**, respectivamente.
+**avgM<sub>i</sub>** es el valor promedio de los elementos de la matriz **M<sub>i</sub>**
 
 ## Solución
 
 ### Secuencial 
 
-Tenemos una arreglo de tamaño de **M** matrices de **N*N** cada una. 
+Tenemos una arreglo de tamaño de **M** matrices de **N*N** cada una.
 
-Recorremos este arreglo y en cada matriz buscamos el minimo, el maximo y vamos sumando los valores de cada posicion de la misma para luego dividir ese total por el tamaño de la matriz y obtener un promedio. Terminado esto realizamos la ecuacion "__(maximo - minimo)/promedio__" la cual una vez calculada, utilizamos su valor para multiplicar la matriz actual. Y por ultimo terminado la multiplicacion avanzamos a la siguiente matriz. 
+Recorremos este arreglo y en cada matriz buscamos el minimo, el maximo y vamos sumando los valores de cada posicion de la misma para luego dividir ese total por el tamaño de la matriz y obtener un promedio. Terminado esto realizamos la ecuacion "__(maximo - minimo)/promedio__" la cual una vez calculada, utilizamos su valor para multiplicar la matriz actual. Y por ultimo terminado la multiplicacion avanzamos a la siguiente matriz.
 
 Finalizado el recorrido del vector, lo volvemos a recorrer para obtener la sumatoria de las matrices
 
 ### Pthreads
 
-Se divide el vector para que cada thread calcule la misma cantidad de matricez. Una vez calculado se divide la sumatoria,cada hilo posee un auxiliar local para calcular su sumatoria que luego se suma en una matriz compartida utilizando exclusion mutua
-
+Se divide el vector para que cada thread calcule la misma cantidad de matrices. Una vez calculado se divide la sumatoria, cada hilo posee un auxiliar local para calcular su sumatoria que luego se suma en una matriz compartida utilizando exclusion mutua
 
 ## Tiempos
 
@@ -120,4 +119,4 @@ Se divide el vector para que cada thread calcule la misma cantidad de matricez. 
 
 ## Conclusiones
 
-No hay dependencia de datos dado que cada hilo calcula __M/hilos__ matrices, pero, al haber una exclusion mutua y al ser una muestra tan chica se nota la diferencia de perfomance entre 2 y 4 hilos , si fuera una muestra mas grande seria como el Ejercicio 1 y seria eficiente tanto para 2 como 4 hilos
+No hay dependencia de datos dado que cada hilo calcula __M/hilos__ matrices, pero, al haber una exclusion mutua y al ser una muestra tan chica se nota la diferencia de perfomance entre 2 y 4 hilos, si fuera una muestra mas grande seria como el Ejercicio 1 y seria eficiente tanto para 2 como 4 hilos
