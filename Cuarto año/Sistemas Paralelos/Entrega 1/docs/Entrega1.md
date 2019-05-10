@@ -79,6 +79,19 @@ avgM<sub>i</sub> es el valor promedio de los elementos de la matriz M<sub>i</sub
 
 ## Solución
 
+### Secuencial 
+
+Tenemos una arreglo de tamaño de **M** matrices de **N*N** cada una. 
+
+Recorremos este arreglo y en cada matriz buscamos el minimo, el maximo y vamos sumando los valores de cada posicion de la misma para luego dividir ese total por el tamaño de la matriz y obtener un promedio. Terminado esto realizamos la ecuacion "__(maximo - minimo)/promedio__" la cual una vez calculada, utilizamos su valor para multiplicar la matriz actual. Y por ultimo terminado la multiplicacion avanzamos a la siguiente matriz. 
+
+Finalizado el recorrido del vector, lo volvemos a recorrer para obtener la sumatoria de las matrices
+
+### Pthreads
+
+Se divide el vector para que cada thread calcule la misma cantidad de matricez. Una vez calculado se divide la sumatoria,cada hilo posee un auxiliar local para calcular su sumatoria que luego se suma en una matriz compartida utilizando exclusion mutua
+
+
 ## Tiempos
 
 | Tamaño | Tiempo Secuencial | Tiempo 2 Threads | Tiempo 4 Threads |
