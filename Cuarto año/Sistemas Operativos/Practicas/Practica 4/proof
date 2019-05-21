@@ -1,0 +1,8 @@
+#!/bin/bash
+
+num_inodos=`df -i | awk '$0 ~ /vol1/ {print $4}'`
+
+for (( i=1; i<=$num_inodos; i++))
+do
+ touch /mnt/vol1/file$i
+done
