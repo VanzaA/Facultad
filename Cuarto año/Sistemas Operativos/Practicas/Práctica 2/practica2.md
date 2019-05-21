@@ -45,17 +45,25 @@ Aún cuando Linus Torvalds no ideó originalmente Linux como un núcleo portable
 
 ### 5. ¿Cómo se define el versionado de los kernels de GNU/Linux?
 
-Linux kernel development has used three different version numbering schemes.
+#### Anatomı́a de una versión: A.B.C.[D]
 
-The first scheme was used in the run-up to version 1.0. The first version of the kernel was 0.01. This was followed by 0.02, 0.03, 0.10, 0.11, 0.12 (the first GPL version), 0.95, 0.96, 0.97, 0.98, 0.99 and then 1.0.[350] From 0.95 on there were many patch releases between versions.
+- **A** Denota Versión. Cambia con menor Frecuencia. en 1994 (versión 1.0), en 1996 (versión
+2.0), en 2011 (versión 3.0) y en en 2015 (versión 4.0).
+- **B** Denota revisión mayor. Antes de la versión 2.6, los números impares indicaban desarrollo,
+los pares producción.
+- **C** Denota revisión menor. Solo cambia cuando hay nuevos drivers o caracterı́sticas.
+- **D** Se utiliza cuando se corrige un grave error sin agregar nueva funcionalidad.
 
-After the 1.0 release and prior to version 2.6, the number was composed as "a.b.c", where the number "a" denoted the kernel version, the number "b" denoted the major revision of the kernel, and the number "c" indicated the minor revision of the kernel. 
 
-In 2004, after version 2.6.0 was released, the kernel developers held several discussions regarding the release and version scheme and ultimately Linus Torvalds and others decided that a much shorter "time-based" release cycle would be beneficial. For about seven years, the first two numbers remained "2.6", and the third number was incremented with each new release, which rolled out after two to three months. A fourth number was sometimes added to account for bug and security fixes (only) to the kernel version. The even-odd system of alternation between stable and unstable was gone. Instead, development pre-releases are titled release candidates, which is indicated by appending the suffix '-rc' to the kernel version, followed by an ordinal number.
+    #### X.Y.Z
 
-The first use of the fourth number occurred when a grave error, which required immediate fixing, was encountered in 2.6.8's NFS code. However, there were not enough other changes to legitimize the release of a new minor revision (which would have been 2.6.9). So, 2.6.8.1 was released, with the only change being the fix of that error. With 2.6.11, this was adopted as the new official versioning policy. Later it became customary to continuously back-port major bug-fixes and security patches to released kernels and indicate that by updating the fourth number.
+- **X** Indica serie principal. Cambia cuando su funcionalidad sufre un cambio muy importante.
+- **Y** Indica si es una versión de producción o desarrollo.
+- **Z** Nuevas versiones dentro de la actual. Bugfixes.
 
-On 29 May 2011, Linus Torvalds announced that the kernel version would be bumped to 3.0 for the release following 2.6.39, due to the minor version number getting too large and to commemorate the 20th anniversary of Linux. It continued the time-based release practice introduced with 2.6.0, but using the second number; for example, 3.1 would follow 3.0 after a few months. An additional number (now the third number) would be added on when necessary to designate security and bug fixes, as for example with 3.0.18; the Linux community refers to this as "x.y.z" versioning. The major version number was also later raised to 4, for the release following version 3.19.
+- Existı́an dos versiones del kernel:
+    - Números Y pares indicaban versión en Producción (estable)
+    - Números Y impares indicaban versión en Desarrollo
 
 ### 6. ¿Cuáles son las razones por las cuáles los usuarios de GNU/Linux recompilan sus kernels?
 
