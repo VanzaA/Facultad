@@ -4,23 +4,29 @@
 
 ### 1. ¿Qué es una System Call?, ¿para que se utiliza?
 
-A system call is a request for service that a program makes of the kernel. The service is generally something that only the kernel has the privilege to do, such as doing I/O. Programmers don’t normally need to be concerned with system calls because there are functions in the GNU C Library to do virtually everything that system calls do. These functions work by making system calls themselves. For example, there is a system call that changes the permissions of a file, but you don’t need to know about it because you can just use the GNU C Library’s chmod function.
+Son llamados al kernel para ejecutar una función especı́fica que controla un dispositivo o ejecuta una instrucción privilegiada
+- Su próposito es proveer una interfaz común para lograr portabilidad
+- Su funcionalidad se ejecuta en modo Kernel pero en contexto del proceso
+
+Las llamadas al sistema comúnmente usan una instrucción especial de la CPU que causa que el procesador transfiera el control a un código privilegiado (generalmente es el núcleo), previamente especificado. Esto permite al código privilegiado especificar donde va a ser conectado así como el estado del procesador.
+
+Cuando una llamada al sistema es invocada, la ejecución del programa que invoca es interrumpida y sus datos son guardados, normalmente en su PCB (Bloque de Control de Proceso del inglés Process Control Block), para poder continuar ejecutándose luego. El procesador entonces comienza a ejecutar las instrucciones de código de bajo nivel de privilegio, para realizar la tarea requerida. Cuando esta finaliza, se retorna al proceso original, y continúa su ejecución. El retorno al proceso demandante no obligatoriamente es inmediato, depende del tiempo de ejecución de la llamada al sistema y del algoritmo de planificación de CPU.
 
 ### 2. ¿Para qué sirve la macro syscall?. Describa el propósito de cada uno de sus parámetros.
 
-There are times when you want to make a system call explicitly, and for that, the GNU C Library provides the syscall function. syscall is harder to use and less portable than functions like chmod, but easier and more portable than coding the system call in assembler instructions.
+syscall() es una pequeña función de biblioteca que invoca la systemcall cuya interfaz de lenguaje assembler tiene el número especificado con los argumentos especificados. Emplear syscall() es útil, por ejemplo, cuando se invoca una llamada del sistema que no tiene una función de contenedor en la biblioteca de C.
 
-syscall is most useful when you are working with a system call which is special to your system or is newer than the GNU C Library you are using. syscall is implemented in an entirely generic way; the function does not know anything about what a particular system call does or even if it is valid.
+syscall() guarda los registros de la CPU antes de realizar la llamada al sistema, restaura los registros al regresar de la llamada al sistema y almacena cualquier código de error devuelto por la llamada al sistema en errno (3) si ocurre un error.
 
-syscall is declared in unistd.h.
+Las constantes simbólicas para los números de llamadas al sistema se pueden encontrar en el archivo de encabezado <sys / syscall.h>.
 
+syscall esta declarada en unistd.h.
 Function: `long int syscall (long int sysno, …)`
+syscall una system call generica.
 
-syscall performs a generic system call.
+sysno es el numero de la system call. cada tipo de system call esta identificada por un numero. Macros para todas las posibles system call estan definidas en sys/syscall.h
 
-sysno is the system call number. Each kind of system call is identified by a number. Macros for all the possible system call numbers are defined in sys/syscall.h
-
-The remaining arguments are the arguments for the system call, in order, and their meanings depend on the kind of system call. Each kind of system call has a definite number of arguments, from zero to five. If you code more arguments than the system call takes, the extra ones to the right are ignored.
+El resto de los argumentos son argumentos para la system call, en orden, y su significado depende del tipo de system call. cada tipo de system call tiene un numero definido de argumentos, entre 0 y 5. si envias mas argumentos que los que la system call recibe, estos van a ser ignorados.
 
 ### 3. ¿Para que sirven los siguientes archivos?
 
@@ -44,9 +50,9 @@ The remaining arguments are the arguments for the system call, in order, and the
 
 ### 4. ¿Para qué sirve la macro asmlinkage?
 
-The asmlinkage tag is one other thing that we should observe about this simple function. This is a #define for some gcc magic that tells the compiler that the function should not expect to find any of its arguments in registers (a common optimization), but only on the CPU's stack. Recall our earlier assertion that system_call consumes its first argument, the system call number, and allows up to four more arguments that are passed along to the real system call. system_call achieves this feat simply by leaving its other arguments (which were passed to it in registers) on the stack. All system calls are marked with the asmlinkage tag, so they all look to the stack for arguments. Of course, in sys_ni_syscall's case, this doesn't make any difference, because sys_ni_syscall doesn't take any arguments, but it's an issue for most other system calls. And, because you'll be seeing asmlinkage in front of many other functions, I thought you should know what it was about.
+Este es un #define para hacer magia con gcc que le dice al compilador que la función no debe esperar encontrar ninguno de sus argumentos en los registros (una optimización común), sino solo en la pila de la CPU. la system_call consume su primer argumento, el número de llamada del sistema, y ​​permite hasta cuatro argumentos más que se pasan a la llamada del sistema real. system_call logra esta hazaña simplemente dejando sus otros argumentos (que se le pasaron en registros) en la pila. Todas las llamadas al sistema están marcadas con la etiqueta asmlinkage, por lo que todas buscan en la pila en busca de argumentos. Por supuesto, en el caso de sys_ni_syscall, esto no hace ninguna diferencia, porque sys_ni_syscall no acepta ningún argumento, pero es un problema para la mayoría de las otras llamadas del sistema. Y, debido a que verá un enlace de video frente a muchas otras funciones, pensé que debería saber de qué se trataba.
 
-It is also used to allow calling a function from assembly files.
+También se utiliza para permitir llamar a una función desde archivos de ensamblaje.
 
 ### 5. ¿Para qué sirve la herramienta strace?, ¿Cómo se usa?
 
@@ -66,29 +72,29 @@ Sin módulos el kernel seria 100% monolitico. Las funcionalidades implementadas 
 
 ### 2. ¿Qué es un driver? ¿para que se utiliza?
 
-Device drivers take on a special role in the Linux kernel. They are distinct "black boxes" that make a particular piece of hardware respond to a well-defined internal programming interface; they hide completely the details of how the device works. User activities are performed by means of a set of standardized calls that are independent of the specific driver; mapping those calls to device-specific operations that act on real hardware is then the role of the device driver. This programming interface is such that drivers can be built separately from the rest of the kernel and "plugged in" at runtime when needed. This modularity makes Linux drivers easy to write, to the point that there are now hundreds of them available.
+Dicho de manera muy simple, el driver o controlador de dispositivos es un pequeño software que conecta el sistema operativo directamente con los componentes del hardware de la PC. Por ejemplo, si tenemos una placa de vídeo instalada en la computadora, esta necesita entenderse con el sistema operativo para poder recibir las instrucciones y procesar todo correctamente; y precisamente esta es la función que cumple el controlador, un puente entre ambos. El driver le da instrucciones al sistema operativo sobre cómo debe funcionar determinado hardware y de que forma el sistema debe trabajar en conjunto para suministrarte los mejores resultados.
 
 ### 3. ¿Porque es necesario escribir drivers?
 
-There are a number of reasons to be interested in the writing of Linux device drivers. The rate at which new hardware becomes available (and obsolete!) alone guarantees that driver writers will be busy for the foreseeable future. Individuals may need to know about drivers in order to gain access to a particular device that is of interest to them. Hardware vendors, by making a Linux driver available for their products, can add the large and growing Linux user base to their potential markets. And the open source nature of the Linux system means that if the driver writer wishes, the source to a driver can be quickly disseminated to millions of users.
+Hay varias razones para estar interesado en la escritura de drivers de Linux. La velocidad a la que el nuevo hardware se vuelve disponible (¡y se vuelve obsoleto!) Garantiza que los escritores de controladores estarán ocupados en el futuro inmediato. Es posible que las personas necesiten conocer los controladores para poder acceder a un dispositivo en particular que sea de su interés. Los proveedores de hardware, al hacer que un controlador de Linux esté disponible para sus productos, pueden agregar la amplia y creciente base de usuarios de Linux a sus mercados potenciales. Y la naturaleza de código abierto del sistema Linux significa que si el controlador del controlador lo desea, la fuente a un controlador se puede difundir rápidamente a millones de usuarios.
 
 ### 4. ¿Cuál es la relación entre modulo y driver en Gnu/Linux?
 
-A kernel module is a bit of compiled code that can be inserted into the kernel at run-time, such as with insmod or modprobe.
+Un módulo del kernel es un código compilado que se puede insertar en el kernel en tiempo de ejecución, como con insmod o modprobe.
 
-A driver is a bit of code that runs in the kernel to talk to some hardware device. It "drives" the hardware. Most every bit of hardware in your computer has an associated driver.¹ A large part of a running kernel is driver code.²
+Un controlador es un poco de código que se ejecuta en el núcleo para comunicarse con algún dispositivo de hardware. Se "impulsa" el hardware. La mayoría de cada hardware en su computadora tiene un controlador asociado. Una gran parte de un núcleo en ejecución es el código del controlador.
 
-A driver may be built statically into the kernel file on disk.³ A driver may also be built as a kernel module so that it can be dynamically loaded later. (And then maybe unloaded.)
+Un controlador puede incorporarse estáticamente en el archivo del kernel en el disco. Un controlador también puede construirse como un módulo del kernel para que luego pueda cargarse dinámicamente.
 
-Standard practice is to build drivers as kernel modules where possible, rather than link them statically to the kernel, since that gives more flexibility. There are good reasons not to, however:
+La práctica estándar es construir controladores como módulos del kernel siempre que sea posible, en lugar de vincularlos estáticamente al kernel, ya que eso da más flexibilidad. Hay buenas razones para no hacerlo, sin embargo:
 
-Sometimes a given driver is absolutely necessary to help the system boot up. That doesn't happen as often as you might imagine, due to the initrd feature.
+A veces, un controlador dado es absolutamente necesario para ayudar al arranque del sistema. Eso no sucede con la frecuencia que pueda imaginar, debido a la función initrd.
 
-Statically built drivers may be exactly what you want in a system that is statically scoped, such as an embedded system. That is to say, if you know in advance exactly which drivers will always be needed and that this will never change, you have a good reason not to bother with dynamic kernel modules.
+Los controladores construidos estáticamente pueden ser exactamente lo que usted desea en un sistema con un alcance estático, como un sistema integrado. Es decir, si sabe de antemano exactamente qué controladores siempre serán necesarios y que esto nunca cambiará, tiene una buena razón para no molestarse con los módulos dinámicos del kernel.
 
-If you build your kernel statically and disable Linux's dynamic module loading feature, you prevent run-time modification of the kernel code. This provides additional security and stability at the expense of flexibility.
+Si construye su kernel de forma estática y desactiva la función de carga dinámica del módulo de Linux, evita la modificación en tiempo de ejecución del código del kernel. Esto proporciona seguridad y estabilidad adicionales a expensas de la flexibilidad.
 
-Not all kernel modules are drivers. For example, a relatively recent feature in the Linux kernel is that you can load a different process scheduler. Another example is that the more complex types of hardware often have multiple generic layers that sit between the low-level hardware driver and userland, such as the USB HID driver, which implements a particular element of the USB stack, independent of the underlying hardware.
+No todos los módulos del kernel son controladores. Por ejemplo, una característica relativamente reciente en el kernel de Linux es que puede cargar un programador de procesos diferente. Otro ejemplo es que los tipos de hardware más complejos a menudo tienen múltiples capas genéricas que se ubican entre el controlador de hardware de bajo nivel y la zona de usuario, como el controlador USB HID, que implementa un elemento particular de la pila USB, independientemente del hardware subyacente.
 
 ### 5. ¿Qué implicancias puede tener un bug en un driver o módulo?
 
@@ -109,10 +115,10 @@ Acorde a esto los drivers se clasifican en:
 
 ### 7. ¿Que hay en el directorio /dev? ¿qué tipos de archivo encontramos en esa ubicación?
 
-/dev is the location of special or device files. It is a very interesting directory that highlights one important aspect of the Linux filesystem - everything is a file or a directory. Look through this directory and you should hopefully see hda1, hda2 etc.... which represent the various partitions on the first master drive of the system. /dev/cdrom and /dev/fd0 represent your CD-ROM drive and your floppy drive. This may seem strange but it will make sense if you compare the characteristics of files to that of your hardware. Both can be read from and written to. Take /dev/dsp, for instance. This file represents your speaker device. Any data written to this file will be re-directed to your speaker. If you try 'cat /boot/vmlinuz > /dev/dsp' (on a properly configured system) you should hear some sound on the speaker. That's the sound of your kernel! A file sent to /dev/lp0 gets printed. Sending data to and reading from /dev/ttyS0 will allow you to communicate with a device attached there - for instance, your modem.
+/dev es la ubicación de archivos especiales o de dispositivo. Es un directorio muy interesante que destaca un aspecto importante del sistema de archivos de Linux: todo es un archivo o un directorio. Mire a través de este directorio y esperemos que vea hda1, hda2, etc. que representan las distintas particiones en la primera unidad maestra del sistema. /dev/cdrom y /dev/fd0 representan su unidad de CD-ROM y su unidad de disquete. Esto puede parecer extraño, pero tendrá sentido si compara las características de los archivos con las de su hardware. Ambos se pueden leer y escribir . Tome /dev/dsp, por ejemplo. Este archivo representa su dispositivo de altavoz. Cualquier dato escrito en este archivo será redirigido a su orador. Si prueba 'cat /boot/vmlinuz >/dev/dsp' (en un sistema configurado correctamente) debería escuchar un sonido en el altavoz. Ese es el sonido de tu núcleo! Se imprime un archivo enviado a /dev/lp0. Enviar datos y leer desde /dev/ttyS0 le permitirá comunicarse con un dispositivo conectado allí, por ejemplo, su módem.
 
-The majority of devices are either block or character devices; however other types of devices exist and can be created. In general, 'block devices' are devices that store or hold data, 'character devices' can be thought of as devices that transmit or transfer data. For example, diskette drives, hard drives and CD-ROM drives are all block devices while serial ports, mice and parallel printer ports are all character devices. There is a naming scheme of sorts but in the vast majority of cases these are completely illogical.
+La mayoría de los dispositivos son dispositivos de bloque o de caracteres; sin embargo existen otros tipos de dispositivos y pueden ser creados. En general, los "dispositivos de bloque" son dispositivos que almacenan o mantienen datos, los "dispositivos de caracteres" pueden considerarse como dispositivos que transmiten o transfieren datos. Por ejemplo, las unidades de disquete, las unidades de disco duro y las unidades de CD-ROM son dispositivos de bloque, mientras que los puertos serie, los ratones y los puertos de impresora paralelos son dispositivos de caracteres. Hay un tipo de esquema de nombres, pero en la gran mayoría de los casos son completamente ilógicos.
 
 ### 8. ¿Para qué sirven el archivos /lib/modules/<version>/modules.dep utilizado por el comando modprobe
 
-modprobe looks through the file /lib/modules/version/modules.dep, to see if other modules must be loaded before the requested module may be loaded. This file is created by depmod -a and contains module dependencies. For example, msdos.ko requires the fat.ko module to be already loaded into the kernel. The requested module has a dependency on another module if the other module defines symbols	(variables or functions) that the requested module uses.
+modprobe examina el archivo /lib/modules/version/modules.dep para ver si se deben cargar otros módulos antes de que se cargue el módulo solicitado. Este archivo es creado por depmod -a y contiene dependencias de módulo. Por ejemplo, msdos.ko requiere que el módulo fat.ko ya esté cargado en el kernel. El módulo solicitado depende de otro módulo si el otro módulo define los símbolos (variables o funciones) que utiliza el módulo solicitado.
