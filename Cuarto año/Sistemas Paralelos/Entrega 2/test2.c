@@ -13,7 +13,7 @@ double dwalltime(){
 
 void master(int vector_size, int n, int v, int rank, int cant_proc);
 void slave(int vector_size, int n, int v, int rank, int cant_proc);
-int calcular(int *vector, int n, int v, int vector_size, int index, int *buffer);
+int calcular(int *vector, int n, int *vector_index, int v, int vector_size, int index, int *buffer);
 
 int main(int argc, char** argv) {
     MPI_Init(&argc, &argv);
@@ -44,9 +44,8 @@ int main(int argc, char** argv) {
     return 0;
 }
 
-int calcular(int *vector, int n, int v, int vector_size, int index, int *total_combinations){
+int calcular(int *vector, int n, int *vector_index, int v, int vector_size, int index, int *total_combinations){
     int j = n - 1;
-    int total_combinations = 0;
     int loop = 1;
     unsigned long long int iteraciones = 0;
     
@@ -85,7 +84,9 @@ void master(int vector_size, int n, int v, int rank, int cant_proc){
     int *vector = (int*) malloc(sizeof(int) * vector_size);
     int *vector_index = (int*) malloc(sizeof(int) * n);
     // Initialize vector
-    
+    int total_combinations = 0;
+    unsigned long long int iteraciones = 0;
+   
     for (int i = 0; i < vector_size; i++) {
         vector[i] = rand()%10;
     }
@@ -115,17 +116,18 @@ void master(int vector_size, int n, int v, int rank, int cant_proc){
             index++;
             messageAvailable = 0;
         } else { 
-        iteraciones += calcular(vector, n, v, vector_size, index, &total_combinations);
+        iteraciones += calcular(vector, n, vector_index, v, vector_size, index, &total_combinations);
         index++;
+        }
+        index = -1;
+        for(int id = 1; id < cant_proc; id++){
+            MPI_Send(&index, 1, MPI_INT, id, 0, MPI_COMM_WORLD);
+            MPI_Recv(&buffer, 2, MPI_INT, id, 0, MPI_COMM_WORLD, &status);
+            total_combinations += buffer[0];
+            iteraciones += buffer[1];
+        }
+        
     }
-    index = -1;
-    for(int id = 1; id < cant_proc; id++){
-        MPI_Send(&index, 1, MPI_INT, id, 0, MPI_COMM_WORLD);
-        MPI_Recv(&buffer, 2, MPI_INT, id, 0, MPI_COMM_WORLD, &status);
-        total_combinations += buffer[0];
-        iteraciones += buffer[1];
-    }
-    
     printf("Total combinations = %d\n", buffer[0]);
     printf("iteraciones del proceso %d totales %llu\n\n", rank,buffer[1]);  
     printf("proceso: %d Time %g\n", rank, dwalltime() - initial_time);
@@ -157,7 +159,7 @@ void slave(int vector_size, int n, int v, int rank, int cant_proc){
     double initial_time = dwalltime();
     while(index != -1){
         buffer[0] = 0;
-        buffer[1] = calcular(vector, n, v, vector_size, index, &buffer[0]);
+        buffer[1] = calcular(vector, n, vector_index, v, vector_size, index, &buffer[0]);
         MPI_Send(&buffer, 2, MPI_INT, 0, 0, MPI_COMM_WORLD);
         MPI_Recv(&index, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     }
