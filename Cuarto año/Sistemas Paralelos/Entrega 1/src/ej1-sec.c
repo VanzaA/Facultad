@@ -43,9 +43,9 @@ int main(int argc, char * argv[]){
 	}
 	#endif
 
-	int i, j, N = atoi(argv[1]), check = 1;
-	double *A, *B, *C, *D, *total;
-	double aux1, aux2, aux3;
+	int i, j, k, N = atoi(argv[1]), check = 1;
+	double *A, *A_trans, *B, *C, *D, *aux_m, *aux_m2, *aux_m3;
+	double aux;
 
 	#ifdef DEBUG
 	if (debug > 1) {
@@ -54,10 +54,13 @@ int main(int argc, char * argv[]){
 	#endif
 
 	A = (double*)malloc(sizeof(double) * N * N);
+	A_trans = (double*)malloc(sizeof(double) * N * N);
 	B = (double*)malloc(sizeof(double) * N * N);
 	C = (double*)malloc(sizeof(double) * N * N);
 	D = (double*)malloc(sizeof(double) * N * N);
-	total = (double*)malloc(sizeof(double) * N * N);
+	aux_m = (double*)malloc(sizeof(double)*N*N);
+	aux_m2 = (double*)malloc(sizeof(double)*N*N);
+	aux_m3 = (double*)malloc(sizeof(double)*N*N);
 
 	for(i = 0; i < N; i++){
 		for(j = 0; j < N; j++){
@@ -86,21 +89,54 @@ int main(int argc, char * argv[]){
 
 	for (i = 0; i < N; i++){
 		for(j = 0; j < N; j++){
-			aux1 = 0, aux2 = 0, aux3 = 0;
-			for(int k = 0; k < N; k++){
-				aux1 += A[i * N + k] * A[k + j * N];
-				aux2 += A[i * N + k] * B[k + j * N];
-				aux3 += C[i * N + k] * D[k + j * N];
+			A_trans[i * N + j] = A[j * N + i];
+			
+			aux = 0;
+			for(k = 0; k < N; k++){
+				aux += A[i * N + k] * A_trans[i * N + j];
 			}
-			total[i * N + j] = aux1 + aux2 + aux3;
+			aux_m[i * N + j] = aux;
 		}
 	}
 
+	for (i = 0; i < N; i++){
+		for(j = 0; j < N; j++){
+			aux = 0;
+			for(k = 0; k < N; k++){
+				aux += A[i * N + k] * B[k * N + j];
+			}
+			aux_m2[i * N + j] = aux;
+		}
+		
+	}
+
+	for (i = 0; i < N; i++){
+		for(j = 0; j < N; j++){
+			aux = 0;
+			for(k = 0; k < N; k++){
+				aux += C[i * N + k] * D[k * N + j];
+			}
+			aux_m3[i * N + j] = aux;
+		}
+	}
+
+	for (i = 0; i < N; i++){
+		for(j = 0; j < N; j++){
+			aux_m[i * N + j] += aux_m2[i * N + j];
+		}
+	}
+
+
+	for (i = 0; i < N; i++){
+		for(j = 0; j < N; j++){
+			aux_m[i * N + j] += aux_m3[i * N + j];
+		}
+	}
 	printf("tiempo total %f\n", dwalltime() - timetick);
 
 	for(i = 0; i < N; i++){
 		for(j = 0; j < N; j++){
-			check = check && (total[i * N + j] == (N*3));
+			check = check && (aux_m[i * N + j] == (N*3));
 		}
 	}
 	if(!check){
