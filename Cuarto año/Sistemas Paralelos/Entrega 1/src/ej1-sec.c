@@ -90,10 +90,14 @@ int main(int argc, char * argv[]){
 	for (i = 0; i < N; i++){
 		for(j = 0; j < N; j++){
 			A_trans[i * N + j] = A[j * N + i];
-			
+		}
+	}
+
+	for (i = 0; i < N; i++){
+		for(j = 0; j < N; j++){
 			aux = 0;
 			for(k = 0; k < N; k++){
-				aux += A[i * N + k] * A_trans[i * N + j];
+				aux += A[i * N + k] * A_trans[i * N + k];
 			}
 			aux_m[i * N + j] = aux;
 		}
@@ -139,6 +143,16 @@ int main(int argc, char * argv[]){
 			check = check && (aux_m[i * N + j] == (N*3));
 		}
 	}
+
+	free(A);
+	free(A_trans);
+	free(B);
+	free(C);
+	free(D);
+	free(aux_m);
+	free(aux_m2);
+	free(aux_m3);
+
 	if(!check){
 		printf("Sum error!\n");
 		return 2;

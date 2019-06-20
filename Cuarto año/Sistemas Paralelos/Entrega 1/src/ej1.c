@@ -45,7 +45,7 @@ int main(int argc, char * argv[]){
 	#endif
 
 	int N;
-	double *A, *A_trans, *B, *C, *D, *aux_m, *aux_m2, *aux_m3;
+	double *A, *A_trans, *B, *C, *D, *aux_m, *aux_m2, *aux_m3, check = 1;
 	double aux;
 
 	int thread_number = atoi(argv[1]);
@@ -99,14 +99,18 @@ int main(int argc, char * argv[]){
 	for (i = 0; i < N; i++){
 		for(j = 0; j < N; j++){
 			A_trans[i * N + j] = A[j * N + i];
-			
+		}
+	}
+
+	#pragma omp parallel for private(i, j, k, aux)
+	for (i = 0; i < N; i++){
+		for(j = 0; j < N; j++){
 			aux = 0;
 			for(k = 0; k < N; k++){
-				aux += A[i * N + k] * A_trans[i * N + j];
+				aux += A[i * N + k] * A_trans[i * N + k];
 			}
 			aux_m[i * N + j] = aux;
 		}
-		
 	}
 
 	#pragma omp parallel for private(i, j, k, aux)
@@ -149,13 +153,20 @@ int main(int argc, char * argv[]){
 
 	printf("tiempo total %f\n", dwalltime() - timetick);
 
-	int check = 1;
-
 	for(i = 0; i < N; i++) {
 		for(j = 0; j < N; j++) {
 			check = check && (aux_m[i * N + j] == (N*3));
 		}
 	}
+
+	free(A);
+	free(A_trans);
+	free(B);
+	free(C);
+	free(D);
+	free(aux_m);
+	free(aux_m2);
+	free(aux_m3);
 
 	if(!check){
 		printf("Sum error!\n");
@@ -170,15 +181,6 @@ int main(int argc, char * argv[]){
 		print_matrix(total, N);
 	}
 	#endif
-
-	free(A);
-	free(A_trans);
-	free(B);
-	free(C);
-	free(D);
-	free(aux_m);
-	free(aux_m2);
-	free(aux_m3);
 
 	return 0;
 }
