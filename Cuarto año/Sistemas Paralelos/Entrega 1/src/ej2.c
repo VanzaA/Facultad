@@ -26,6 +26,15 @@ void print_matrix(double *matrix, int N){
 	}
 }
 
+void print_matrix_as_vector(double *matrix, int N){
+	for(int i = 0; i < N; i++){
+		for(int j = 0; j < N; j++){
+			printf(" %g + ", matrix[i * N + j]);
+		}
+	}
+    printf("\n");
+}
+
 
 int summatory_value(int tid){
     int start = (m / thread_number) * tid;
@@ -56,6 +65,11 @@ int summatory_value(int tid){
         }
         average = average / (N * N);
         division = (max - min) / average;
+        #ifdef DEBUG
+        if (debug > 1) {
+            printf("min = %g\nmax = %g\naverage = %g\ndivision = %g\n\n", min, max, average, division);
+        }
+        #endif
         for(int i = 0; i < N; i++) {
             for(int j = 0; j < N; j++) {
                 matrices[matrix_index][i * N + j] *= division;
@@ -67,9 +81,8 @@ int summatory_value(int tid){
 }
 
 int summatory_operation(int tid){
-    int start = (matrix_size / thread_number) * tid;
-    int limit =  (matrix_size / thread_number) * (tid + 1);
-    double *matrix_aux = (double*)calloc(matrix_size, sizeof(double));
+    int start = (N / thread_number) * tid;
+    int limit =  (N / thread_number) * (tid + 1);
 
     #ifdef DEBUG
     if (debug > 1) {
@@ -80,27 +93,11 @@ int summatory_operation(int tid){
     for(int matrix_index = 0; matrix_index < m; matrix_index++) {
         for(int i = start; i < limit; i++) {
             for(int j = 0; j < N; j++) {
-                #ifdef DEBUG
-                if (debug > 4) {
-                    printf("%d access to matrix position %d\n", tid, i * N + j);
-                }
-                #endif
-                //matrix_aux[i * N + j] += matrices[matrix_index][i * N + j];
+                sum_total[i * N + j] += matrices[matrix_index][i * N + j];
             }
         }
     }
 
-    for(int i = start; i < limit; i++) {
-        for(int j = 0; j < N; j++) {
-            #ifdef DEBUG
-            if (debug > 4) {
-                printf("%d access to matrix position %d\n", tid, i * N + j);
-            }
-            #endif           
-            sum_total[i * N + j] += matrix_aux[i * N + j];
-        }
-    }
-    free(matrix_aux);
     return 0;
 }
 
@@ -197,7 +194,6 @@ int main(int argc, char *argv[]){
     // Wait for all threads
     for (int i = 0; i < thread_number; i++) {
         pthread_join(threads[i], NULL);
-        puts("plis");
     }
 
     printf("tiempo total: %f\n", dwalltime() - timetick);
