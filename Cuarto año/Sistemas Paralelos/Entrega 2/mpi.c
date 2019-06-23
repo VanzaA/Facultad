@@ -49,15 +49,13 @@ int main(int argc, char** argv) {
 int calcular(int *vector, int n, int v, int vector_size, int index){
     int j = n - 1;
     int loop = 1;
-    unsigned long int iteraciones = 0;
     int *vector_index = (int*) malloc(sizeof(int) * n);
     for (int i = 0; i < n; i++){
         vector_index[i]= index + i;
     }
-    int total_combinations = 0;
+    long unsigned total_combinations = 0;
     
     while(loop){
-        iteraciones++;
         int sum = 0;
         for (int i = 0; i < n; i++){
             sum += vector[vector_index[i]];
@@ -71,41 +69,38 @@ int calcular(int *vector, int n, int v, int vector_size, int index){
                 vector_index[j - 1]++;
                 j--;
             }
-            else{   
+            else{
                 loop = 0;
                 break;
             }
         }
         if(j == 0){
             break;
-        } 
+        }
         if(loop){
             for (; j < (n - 1); j++){
                 vector_index[j + 1] = vector_index[j] + 1;
             }
         }
     }
+
     free(vector_index);
     return total_combinations;
 }
 
 void master(int vector_size,int *vector, int n, int v,  int cant_proc){
-    
     int index = 0;
     int id_slave;
-    
     // Initialize vector
     for (int i = 0; i < vector_size; i++) {
         vector[i] = 1;
     }
-    
     MPI_Bcast(vector, vector_size, MPI_INT, 0, MPI_COMM_WORLD);
-    
-    
+
     double initial_time = dwalltime();
 
     while(index <  vector_size - n){
-        MPI_Recv(&id_slave,1, MPI_INT, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+	    MPI_Recv(&id_slave,1, MPI_INT, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         MPI_Send(&index, 1, MPI_INT, id_slave, 0, MPI_COMM_WORLD);
         index++;
     }
@@ -113,25 +108,24 @@ void master(int vector_size,int *vector, int n, int v,  int cant_proc){
     for(int id = 1; id < cant_proc; id++){
         MPI_Send(&index, 1, MPI_INT, id, 0, MPI_COMM_WORLD);
     }
-    printf("llegue\n");
-    int global_combinations  ;
-    int zero = 0;  
-    
-    MPI_Reduce(&zero, &global_combinations, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
-    
+    long unsigned global_combinations = 0 ;
+    long unsigned zero = 0;
+
+    MPI_Reduce(&zero, &global_combinations, 1, MPI_UNSIGNED_LONG, MPI_SUM, 0, MPI_COMM_WORLD);
+
     printf("proceso:(0) ---- Tiempo total = %g\n\n", dwalltime() - initial_time);
-    
-    printf("Total combinations : %d\n\n", global_combinations);
-    
+
+    printf("Total combinations : %lu\n\n", global_combinations);
+
     free(vector);
 }
 
 void slave(int vector_size, int *vector, int n, int v, int rank, int cant_proc){
-    int index =0;
-    int total_combinations = 0;
-  
+    int index = 0;
+    long unsigned total_combinations = 0;
+
     MPI_Bcast(vector, vector_size, MPI_INT, 0, MPI_COMM_WORLD);
-        
+
     double initial_time = dwalltime();
     while(index != -1){
         MPI_Send(&rank, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
@@ -140,13 +134,12 @@ void slave(int vector_size, int *vector, int n, int v, int rank, int cant_proc){
             total_combinations += calcular(vector, n, v, vector_size, index);
         }
     }
-    
-    
-    int global_combinations;
-    
-    MPI_Reduce(&total_combinations, &global_combinations, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
-    
-    printf("proceso: (%d) ---- Tiempo total = %g, combinaciones = %d\n\n", rank, dwalltime() - initial_time, total_combinations);
+
+    int global_combinations = 0;
+
+    MPI_Reduce(&total_combinations, &global_combinations, 1, MPI_UNSIGNED_LONG, MPI_SUM, 0, MPI_COMM_WORLD);
+
+    printf("proceso: (%d) ---- Tiempo total = %g, combinaciones = %lu\n\n", rank, dwalltime() - initial_time, total_combinations);
 
     free(vector);
 }
