@@ -1,5 +1,5 @@
 CC := gcc
-STD := -std=c99
+STD := -std=gnu99
 SRC_DIR := src
 TEMPLATE_DIR := templates
 BIN_DIR := bin

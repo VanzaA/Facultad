@@ -95,7 +95,7 @@ int main(int argc, char * argv[]){
 
 	double timetick = dwalltime();
 
-	#pragma omp parallel for private(i, j, k, aux)
+	#pragma omp parallel for private(i, j)
 	for (i = 0; i < N; i++){
 		for(j = 0; j < N; j++){
 			A_trans[i * N + j] = A[j * N + i];
@@ -159,15 +159,6 @@ int main(int argc, char * argv[]){
 		}
 	}
 
-	free(A);
-	free(A_trans);
-	free(B);
-	free(C);
-	free(D);
-	free(aux_m);
-	free(aux_m2);
-	free(aux_m3);
-
 	if(!check){
 		printf("Sum error!\n");
 		return 2;
@@ -178,9 +169,18 @@ int main(int argc, char * argv[]){
 	#ifdef DEBUG
 	if (debug > 1) {
 		printf("\n\nFinal matrix A\n");
-		print_matrix(total, N);
+		print_matrix(aux_m, N);
 	}
 	#endif
+
+	free(A);
+	free(A_trans);
+	free(B);
+	free(C);
+	free(D);
+	free(aux_m);
+	free(aux_m2);
+	free(aux_m3);
 
 	return 0;
 }
