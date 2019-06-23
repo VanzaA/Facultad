@@ -156,7 +156,7 @@ int main(int argc, char *argv[]){
     for (int matrix_index = 0; matrix_index < m; matrix_index++) {
         for(int i = 0; i < N; i++) {
             for(int j = 0; j < N; j++) {
-                matrices[matrix_index][i * N + j] = rand()%10;
+                matrices[matrix_index][i * N + j] = 1;
             }
         }
     }
