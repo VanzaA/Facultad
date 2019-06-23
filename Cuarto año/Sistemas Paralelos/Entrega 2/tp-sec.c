@@ -43,7 +43,7 @@ int main(int argc, char* argv[]){
   
   // Initialize vector
   for (int i = 0; i < vector_size; i++) {
-    vector[i] = rand()%10;
+    vector[i] = i;
   }
    
   for(int i = 0; i < combinations; i++){
@@ -66,8 +66,8 @@ int main(int argc, char* argv[]){
     vector_index[j]++;
     while(vector_index[j] == (vector_size - combinations + j + 1)){
       if(j > 0){
-        vector_index[j - 1]++;
         j--;
+        vector_index[j]++;
       }
       else{
         loop = 0;
