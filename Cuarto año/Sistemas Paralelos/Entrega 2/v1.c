@@ -96,7 +96,7 @@ void master(int vector_size,int *vector, int n, int v,  int cant_proc){
     long unsigned total_combinations = 0;
     // Initialize vector
     for (int i = 0; i < vector_size; i++) {
-        vector[i] = 1;
+        vector[i] = i;
     }
     MPI_Bcast(vector, vector_size, MPI_INT, 0, MPI_COMM_WORLD);
 
@@ -106,7 +106,7 @@ void master(int vector_size,int *vector, int n, int v,  int cant_proc){
         MPI_Iprobe(MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &messageAvailable, &status);
         if(messageAvailable) {
             MPI_Recv(&id_slave, 1, MPI_INT, status.MPI_SOURCE, 0, MPI_COMM_WORLD, &status);
-            MPI_send(&index, 1, MPI_INT, id_slave, 0, MPI_COMM_WORLD, MPI_COMM_WORLD);
+            MPI_Send(&index, 1, MPI_INT, id_slave, 0, MPI_COMM_WORLD);
             index++;
             messageAvailable = 0;
         } else {
@@ -121,9 +121,9 @@ void master(int vector_size,int *vector, int n, int v,  int cant_proc){
     }
     long unsigned global_combinations = 0 ;
 
-    MPI_Reduce(&zero, &global_combinations, 1, MPI_UNSIGNED_LONG, MPI_SUM, 0, MPI_COMM_WORLD);
+    MPI_Reduce(&total_combinations, &global_combinations, 1, MPI_UNSIGNED_LONG, MPI_SUM, 0, MPI_COMM_WORLD);
 
-    printf("proceso: (%d) ---- Tiempo total = %g, combinaciones = %lu\n\n", rank, dwalltime() - initial_time, total_combinations);
+    printf("proceso: (%d) ---- Tiempo total = %g, combinaciones = %lu\n\n", 0, dwalltime() - initial_time, total_combinations);
     
     printf("Total combinations : %lu\n\n", global_combinations);
 
