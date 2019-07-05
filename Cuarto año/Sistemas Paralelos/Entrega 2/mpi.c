@@ -93,7 +93,7 @@ void master(int vector_size,int *vector, int n, int v,  int cant_proc){
     int id_slave;
     // Initialize vector
     for (int i = 0; i < vector_size; i++) {
-        vector[i] = 1;
+        vector[i] = i;
     }
     MPI_Bcast(vector, vector_size, MPI_INT, 0, MPI_COMM_WORLD);
 
