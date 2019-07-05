@@ -38,11 +38,14 @@ Donde **A**, **B**, **C** y **D** son matrices de **NxN**.
 
 ### Secuencial
 
- Dadas las matrices **A, B, C y D** de tamaño **N*N**, se busca calcular la ecuacion **AA + AB + CD**. Lo primero es calcular los valores de las matrices **AA, AB, CD** en los índices **i**, **j** siendo estas __AA = A[i,j] * A[i,j] --- AB = A[i,j] * B[i,j] --- CD = C[i,j] * D[i,j]__ utilizando una multiplicacion normal de matrices, y antes de aumentar el índice se suman los valores obtenidos anteriormente y se asignan en la matriz **TOTAL** en la misma posicion **i**, **j**, o sea, __TOTAL[i,j] = AA + AB + CD__
+Dadas las matrices **A, B, C y D** de tamaño **N*N**, se busca calcular la ecuacion **AA + AB + CD**. Lo primero es calcular los valores de las matrices **AA, AB, CD** en los índices **i**, **j** siendo estas __AA = A[i,j] * A[i,j] --- AB = A[i,j] * B[i,j] --- CD = C[i,j] * D[i,j]__ utilizando una multiplicacion de matrices, y antes de aumentar el índice se suman los valores obtenidos anteriormente y se asignan en la matriz **TOTAL** en la misma posicion **i**, **j**, o sea, __TOTAL[i,j] = AA + AB + CD__
+Cada una de las multiplicaciones se hace en un bloque **for** diferente, para evitar muchos cambios en la memoria al cargar las matrices, sobre todo al crecer el tamaño de las mismas.
+En la primer multiplicación, al ser dos veces la misma matriz, se utiliza la función de transponer la matriz, para luego multiplicarla accediendo normalmente en ambos casos.
 
 ### OpenMP
 
 Se engloba el bloque a paralelizar bajo la primitiva _parallel_, se utiliza la primitiva _for_ en los bloques iterativos para que se reparta la cantidad de trabajo entre los hilos y por ultimo la primitiva _private_ asignandole a cada hilo sus propios índices y auxiliares para realizar las cuentas.
+De igual manera que en el programa secuencial, cada una de las multiplicaciones se realiza en un bloque **for** diferente, y realizando la matriz transpuesta de **A**
 
 ## Tiempos
 
@@ -91,7 +94,8 @@ Finalizado el recorrido del vector, lo volvemos a recorrer para obtener la sumat
 
 ### Pthreads
 
-Se divide el vector para que cada thread calcule la misma cantidad de matrices. Una vez calculado se divide la sumatoria, cada hilo posee un auxiliar local para calcular su sumatoria que luego se suma en una matriz compartida utilizando exclusion mutua
+Se divide el vector para que cada thread calcule el máximo, minimo y promedio de cada matriz, de esta manera no se genera dependencia de datos en ningún momento.
+Al terminar de calcular todos los valores, se realiza una barrera para esperar a todos los hilos, y continuar con la multiplicación de esos valores con la matriz. Esto se hace recorriendo por "columnas", siendo que cada hilo va a trabajar sobre una partición de cada matriz. Esto es más eficiente, ya que no es necesario contar con una zona de exclusión mutua. 
 
 ## Tiempos
 
@@ -119,4 +123,4 @@ Se divide el vector para que cada thread calcule la misma cantidad de matrices. 
 
 ## Conclusiones
 
-No hay dependencia de datos dado que cada hilo calcula __M/hilos__ matrices, pero, al haber una exclusion mutua y al ser una muestra tan chica se nota la diferencia de perfomance entre 2 y 4 hilos, si fuera una muestra mas grande seria como el Ejercicio 1 y seria eficiente tanto para 2 como 4 hilos
+No hay dependencia de datos dado que cada hilo calcula __M/hilos__ matrices, y al tratarse de un arreglo de matrices, se puede trabajar de diferentes maneras, a conveniencia del problema.
