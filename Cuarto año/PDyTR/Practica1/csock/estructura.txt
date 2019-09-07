@@ -1,0 +1,16 @@
+CONTIENEN INFORMACION DEL SOCKET
+
+struct sockaddr 
+{ 
+   unsigned short sa_family;  /* familia de la dirección */ 
+   char sa_data[14];          /* 14 bytes de la dirección del protocolo */  
+}; 
+
+
+struct sockaddr_in 
+{ 
+   short int sin_family;        /* Familia de la Dirección              */ 
+   unsigned short int sin_port; /* Puerto                               */
+   struct in_addr sin_addr;     /* Dirección de Internet                */
+   unsigned char sin_zero[8];   /* Del mismo tamaño que struct sockaddr */ 
+}; 
