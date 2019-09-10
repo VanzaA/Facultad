@@ -1,0 +1,40 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="./css/styles.css">
+    <title>Instrumentes</title>
+</head>
+<body onload="init()">
+        <div class="formvisual">
+            <h1>Instrumentos</h1>
+            <table id="tabla">
+                <tr>
+                    <th>Id</th>
+                    <th>Tipo</th>
+                    <th>Observaciones</th>
+                </tr>
+            </table>
+            <form>
+                <div class="form-input">
+                    <label>Identificacion<span>*</span></label><br> 
+                    <input placeholder="Identificacion" id="id" type="text" name="name"><br>
+                    <label>Tipo<span>*</span></label><br>
+                    <select placeholder="Tipo" id="type" name="type"></select><br>
+                    <label>Observaciones</label><br>            
+                    <textarea placeholder="Ingrese sus Observaciones sobre el intrumento" id="description" rows="4" cols="40" name="description"></textarea><br>
+                </div>
+                <div>
+                    <button type="button" onclick="addItem()">Guardar</button>
+                    <button type="button" onclick="reset()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+        <span>Los campos con asteriscos(*) son requeridos<span><br/>
+        <span style="color:#fafafa">Hecho por Agustin Vanzato, Gonzalo Bilbao, Federico Gasquez<span>
+        <script src="./js/index.js"></script>
+        </body>
+        </html>

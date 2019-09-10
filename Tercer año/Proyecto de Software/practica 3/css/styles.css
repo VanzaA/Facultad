@@ -1,0 +1,29 @@
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+th, td {
+    padding: 15px;
+    text-align: left;
+}
+th{
+    background-color: #808080;
+}
+table {
+    width: 100%;    
+}
+
+.formvisual{
+    padding:1em;
+    text-align: center;
+    border: 1px solid black;
+}
+.form-input{
+    margin: 1em;
+    text-align: left
+}
+
+span{
+    text-align: left;
+    color:red;
+}
