@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+if [ "$1" == "-h" -o "$1" == "--help" ]; then
+  echo "Usage:"
+  echo -e "\trun [CANT] [BUFFER_SIZE]\n"
+  echo -e "Write to \`buffer_[BUFFER_SIZE]_data\`\n"
+  exit 0
+fi
+
+LOOP=${1:-10}
+BUFFER_SIZE=${2:-1000}
+FILE="buffer_${BUFFER_SIZE}_data"
+
+rm $FILE
+touch $FILE
+chmod 666 $FILE
+
+for ((i=1; i <= $LOOP; i++)); do
+  echo -e "Run $i/$LOOP - Buffer size: $BUFFER_SIZE"
+  bin/server-${BUFFER_SIZE} "900${i}" &> /dev/null &
+  bin/client-${BUFFER_SIZE} localhost "900${i}" | grep time | cut -d: -f2 >> $FILE
+  if [ $? -eq 1 ]; then
+    for ((j=1; j <= 10; j++ )); do
+      echo -e "Retry n° $j $i/$LOOP - Buffer size: $BUFFER_SIZE"
+      bin/client-${BUFFER_SIZE} localhost "900${i}" 1 >> $FILE
+      sleep 2
+    done
+    if [ "$?" -ne 1 ]; then
+      rm $FILE
+      exit 1
+    fi
+  fi
+  sleep 2
+done
+
+DS=`awk '{x+=$0;y+=$0^2}END{print sqrt(y/NR-(x/NR)^2)}' $FILE`
+MEDIA=`awk '{for(i=1;i<=NF;i++)s+=$i}END{print s}' $FILE`
+
+echo "===================" >> $FILE
+printf "Media: " >> $FILE
+echo $MEDIA >> $FILE
+printf "Desviacion estandar: " >> $FILE
+echo $DS >> $FILE
+
