@@ -81,6 +81,15 @@ int main(int argc, char *argv[])
         error("ERROR connecting");
     bzero(buffer,BUFFER_SIZE);
     
+    double start = dwalltime();
+
+    //envia el primer mensaje
+    char msg[] = "Hola";
+    n = write(sockfd,msg,sizeof(msg));
+    n = read(sockfd,msg,sizeof(msg));
+
+    printf("time:%g\n", (dwalltime()-start)/2);
+
     int i = 0;
     buffer[i++] = 'r';
     for (i; i < BUFFER_SIZE-5; i++) {
@@ -93,8 +102,6 @@ int main(int argc, char *argv[])
 
     printf("Tamaño del buffer: %d\n", strlen(buffer));
 
-    double start = dwalltime();
-
     //ENVIA UN MENSAJE AL SOCKET
 	n = write(sockfd,buffer,strlen(buffer));
     if (n < 0) 
@@ -104,11 +111,12 @@ int main(int argc, char *argv[])
     unsigned long buffer_hash;
     buffer_hash = hash(buffer);
     n = write(sockfd,&buffer_hash,sizeof(buffer_hash));
+    printf("Checksum: %lu\n", buffer_hash);
 	
     //ESPERA RECIBIR UNA RESPUESTA
     bzero(buffer,BUFFER_SIZE);
 	n = read(sockfd,buffer,BUFFER_SIZE-1);
-    printf("time:%g\n", (dwalltime()-start)/4);
+    printf("tiempo total:%g\n", (dwalltime()-start));
 
     if (n < 0) 
          error("ERROR reading from socket");

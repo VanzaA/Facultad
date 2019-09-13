@@ -85,6 +85,11 @@ int main(int argc, char *argv[])
           error("ERROR on accept");
      bzero(buffer,BUFFER_SIZE);
 
+    //lee el primer mensaje
+    char msg[4];
+    n = read(newsockfd,msg,sizeof(msg));
+    n = write(newsockfd,msg,sizeof(msg));
+
 	//LEE EL MENSAJE DEL CLIENTE
      n = read(newsockfd,buffer, BUFFER_SIZE-1);
      if (n < 0) error("ERROR reading from socket");
