@@ -100,10 +100,6 @@ int main(int argc, char *argv[])
     if (n < 0) 
          error("ERROR writing to socket");
 
-    //Envia el tamaño del dato
-    size_t data_length = strlen(buffer);
-    n = write(sockfd, &data_length, sizeof(data_length));
-
     //Envia el checksum
     unsigned long buffer_hash;
     buffer_hash = hash(buffer);

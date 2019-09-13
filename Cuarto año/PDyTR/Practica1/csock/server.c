@@ -88,12 +88,8 @@ int main(int argc, char *argv[])
 	//LEE EL MENSAJE DEL CLIENTE
      n = read(newsockfd,buffer, BUFFER_SIZE-1);
      if (n < 0) error("ERROR reading from socket");
-     printf("Here is the message: %s \n Cantidad de caracteres: %i\n",buffer, n);
 
-     //Recibe el length
-     size_t data_length;
-     n = read(newsockfd,&data_length,sizeof(data_length));
-     printf("El tamaño recibido es: %d\nel tamaño enviado por el cliente es %d\n", strlen(buffer), data_length);
+     printf("El tamaño recibido es: %d\n", strlen(buffer));
 
      //Recibe el checksum del cliente
      unsigned long buffer_checksum;
