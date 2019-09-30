@@ -1,0 +1,44 @@
+Simple RPC program that adds a variable number of integers
+(sent as a variable length array).
+
+This RPC program supports 1 remote procedure:
+
+	vadd : adds a bunch of ints and returns the int sum.
+
+
+The key to using a variable length array is to understand how such an
+array is implemented by XDR. A variable length array is
+encoded/decoded by first encoding/decoding the (integer) length of the
+array. Next comes the array elements starting with the first (index
+[0]) and so on. If we use rpcgen, we need to know what specific data
+structures rpcgen expects us to use to specify both the length and the
+list of array elements. This is easy - just look at the code generated
+by rpcgen (all you need to look at is really the .h file). rpcgen will
+define a struct for us that holds both the array length and a pointer
+to the array elements. 
+
+The client stubs produced by rpcgen will be expecting one of these structs
+(a pointer to one of these structs), and the remote procedure we supply must 
+take a pointer to one of these structs as an argument. For example, suppose
+we want to use a variable length array of int. We need to declare a new type name:
+
+typedef int iarray<>;
+
+The <> means "variable length array" in XDR.
+
+Seeing this typedef in the protocol definition file, rpcgen will create
+the following:
+
+typedef struct {
+	u_int iarray_len;
+	int *iarray_val;
+} iarray;
+
+In our code we need to declare function parameters as having type iarray
+(or pointer to iarray). Inside our functions we need to access the fields.
+
+Check out the code in this directory for an example. This example passes a variable
+length array of ints to the remote procedure, which returns the sum.
+
+
+

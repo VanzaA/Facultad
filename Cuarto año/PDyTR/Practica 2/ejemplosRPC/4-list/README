@@ -1,0 +1,25 @@
+Example of using a linked list (simply linked). Although this example
+is pretty simple, it shows how XDR handles pointers. The most interesting
+part of this example is probably the generated code in ll_xdr - the 
+xdr filter that encodes/decodes linked lists (uses xdr_pointer)
+
+The linked list is based on record defined as follows (in ll.x):
+
+struct foo {
+	int x;
+	foo *next;
+};
+
+Each record holds an int and a pointer to the next node.
+
+There is a single remote procedure that returns the sum of
+the integers in a linked list.
+
+FILES:
+
+ll.x: this is the RPC protocol definition file. 
+llclient.c : client code, creates a linked list from the
+   command line arguments and passed to the remote procedure
+llservice.c : server code, does the summation of ints in the linked list.
+	rpcgen -C -Ss generated most of this.
+
