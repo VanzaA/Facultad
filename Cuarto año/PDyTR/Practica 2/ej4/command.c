@@ -74,9 +74,10 @@ ftp_write(CLIENT *clnt, ftp_param_t *param)
         ftp_file_data.name = strcpy(ftp_file_data.name, dest);
         ftp_file_data.checksum = hash(ftp_file_data.data.data_val);
 
+
         fclose(file);
 
-        
+
         /* Call the client stub created by rpcgen */
         result = write_1(ftp_file_data, clnt);
         if (result == NULL)

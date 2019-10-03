@@ -98,9 +98,6 @@ main(int argc, char *argv[])
                 exit(1);
         }
 
-        if (verbose_flag)
-                printf("Connecting to server with host %s\n", host);
-
         ftp_param_t param = {
                 .src = src,
                 .dest = dest,
