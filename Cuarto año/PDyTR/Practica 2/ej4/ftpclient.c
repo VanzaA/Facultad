@@ -22,7 +22,7 @@ main(int argc, char *argv[])
 
         strcpy(src, ""); strcpy(dest, ""); strcpy(host, "");
 
-        uint64_t bytes = DATA_SIZE, initial_pos = 0;
+        uint64_t bytes = 0, initial_pos = 0;
 
         static command_t commands[] = {
                 {

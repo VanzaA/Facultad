@@ -21,23 +21,10 @@ hash(char *str)
 }
 
 
-double
-dwalltime(void)
-{
-        double sec;
-        struct timeval tv;
-
-        gettimeofday(&tv, NULL);
-        sec = tv.tv_sec + tv.tv_usec/1000000.0;
-        return sec;
-}
-
-
 void
 ini_params(int argc, char *argv[], char *host, char *src, char *dest,
            uint64_t *bytes, uint64_t *initial_pos)
 {
-        static int verbose_flag;
         static int all_flag = 0;
         int c;
 
