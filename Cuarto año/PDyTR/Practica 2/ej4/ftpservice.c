@@ -24,10 +24,9 @@ int *
 write_1_svc(ftp_file arg, struct svc_req *rqstp)
 {
         char *name = arg.name;
-        char *buffer = (char *) malloc(DATA_SIZE);
+        char *buffer = (char *) malloc(1024);
         strcpy(buffer, arg.data.data_val);
         int length = arg.data.data_len;
-        uint64_t income_checksum = arg.checksum;
 
         printf("name: %s - buffer length: %d\n", name, length);
 
@@ -40,8 +39,6 @@ write_1_svc(ftp_file arg, struct svc_req *rqstp)
         // Set path
         snprintf(path, PATH_MAX, "%s/%s", "store", name);
         
-        printf("Path: %s\n\n", path);
-
         dir = opendir("store");
         if (dir)
         {
@@ -59,7 +56,7 @@ write_1_svc(ftp_file arg, struct svc_req *rqstp)
         }
 
         // Open file and check errors
-        file = fopen(path, "w");
+        file = fopen(path, "a");
         if (file == NULL)
         {
                 fprintf(stderr, "Error creating file '%s'\n", path);
@@ -67,15 +64,8 @@ write_1_svc(ftp_file arg, struct svc_req *rqstp)
                 return &result;
         }
     
-        // Check checksum
-        uint64_t checksum = hash(buffer);
-        if (income_checksum != checksum)
-        {
-                fprintf(stderr, "Error in checksum!!\nOriginal: %"PRIu64"\nOwn: %"PRIu64"\n", income_checksum, checksum);
-        }
-
         // Write file
-        result = fwrite(buffer, sizeof(char), length, file);
+        result = fwrite(arg.data.data_val, sizeof(char), length, file);
 
         fclose(file);
         printf("Storing %s...\n", path);

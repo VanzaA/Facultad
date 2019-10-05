@@ -59,7 +59,7 @@ ftp_read(CLIENT *clnt, ftp_param_t *param)
                         bytes = req.bytes;
                 }
         }
-        printf("End storing");
+        printf("End storing\n");
 
         fclose(file);
 
@@ -73,7 +73,6 @@ ftp_write(CLIENT *clnt, ftp_param_t *param)
         char *src = param->src;
         char *dest = param->dest;
         uint64_t bytes = param->bytes;
-        uint64_t initial_pos = param->initial_pos;
 
         FILE* file;
 
@@ -84,22 +83,37 @@ ftp_write(CLIENT *clnt, ftp_param_t *param)
                 exit(1);
         }
 
+        int read_all = 0;
+
+        if(!bytes){
+                read_all = 1;
+        }
+
         ftp_file ftp_file_data;
         int *result;
-
-        /* Gather everything into a single data structure to send to the server */
+        int bytes_to_read = 1024;
         ftp_file_data.data.data_val = (char *) malloc(DATA_SIZE);
-        ftp_file_data.data.data_len = fread(ftp_file_data.data.data_val, sizeof(char), bytes, file);
         ftp_file_data.name = (char *) malloc(PATH_MAX);
         ftp_file_data.name = strcpy(ftp_file_data.name, dest);
-        ftp_file_data.checksum = hash(ftp_file_data.data.data_val);
+        
+        while(!feof(file) && (read_all || bytes > 0)){
+                if(bytes < 1024 && !read_all) {
+                        bytes_to_read = bytes;
+                }
+                ftp_file_data.data.data_len = fread(ftp_file_data.data.data_val, sizeof(char), bytes_to_read, file);
+                bytes -= ftp_file_data.data.data_len;
+                if(!ftp_file_data.data.data_len){
+                        break;
+                }
+                result = write_1(ftp_file_data, clnt);
+                printf("sending data\n");
+        }
 
 
         fclose(file);
 
 
         /* Call the client stub created by rpcgen */
-        result = write_1(ftp_file_data, clnt);
         if (result == NULL)
         {
                 fprintf(stderr,"Trouble calling remote procedure\n");
