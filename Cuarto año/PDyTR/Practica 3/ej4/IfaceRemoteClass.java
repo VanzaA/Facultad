@@ -16,4 +16,7 @@ public interface IfaceRemoteClass extends Remote
 
     public byte[] read(String filename, int pos, int bufferSize) throws RemoteException;
 
+    public boolean timeout(int sleep) throws RemoteException;
+    public boolean min_time() throws RemoteException;
+
 }

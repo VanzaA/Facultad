@@ -5,13 +5,14 @@
 *
 */
 /* Needed for implementing remote method/s */
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.DirectoryStream;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 import java.nio.file.StandardOpenOption;
 import java.io.IOException;
 
@@ -62,5 +63,21 @@ public class RemoteClass extends UnicastRemoteObject implements IfaceRemoteClass
             System.out.println(e.toString());
             return new byte[0];
         }
+    }
+
+    public boolean timeout(int sleep) throws RemoteException
+    {
+        try {
+            System.out.println("Sleeping " + sleep + " seconds");
+            TimeUnit.SECONDS.sleep(sleep);
+        } catch(InterruptedException e) {
+            return false;
+        }
+        return true;
+    }
+
+    public boolean min_time() throws RemoteException
+    {
+        return true;
     }
 }

@@ -85,6 +85,8 @@ public class AskRemote
             String rname = "//" + args[0] + ":" + Registry.REGISTRY_PORT + "/remote";
             IfaceRemoteClass remote = (IfaceRemoteClass) Naming.lookup(rname);
             int buffersize = 1024;
+            long startTime;
+            long stopTime;
 
             int start = 0;
             if(args.length == 4){
@@ -103,6 +105,26 @@ public class AskRemote
                         System.out.println("3 arguments needed: Hostname, operation and filename");
                     }
                     read(remote, args[2], start, buffersize);
+                    break;
+                 case "min_time":
+                    startTime = System.nanoTime();
+                    remote.min_time();
+                    stopTime = System.nanoTime();
+                    System.out.println(stopTime - startTime);
+                    break;
+                case "timeout":
+                    if(args.length < 3){
+                        System.out.println("3 arguments needed: Hostname, operation and time");
+                    }
+                    System.out.println("timeout command...");
+                    startTime = System.nanoTime();                    
+                    Boolean ret = remote.timeout(Integer.parseInt(args[2]));
+                    stopTime = System.nanoTime();
+                    System.out.println(stopTime - startTime);
+                    System.out.println(ret);
+                    break;    
+                default: 
+                    System.out.println("Command unavailable");
                     break;
             }
 
