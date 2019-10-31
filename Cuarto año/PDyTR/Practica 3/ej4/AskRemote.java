@@ -7,6 +7,7 @@ import java.rmi.Naming; /* lookup */
 import java.rmi.registry.Registry; /* REGISTRY_PORT */
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -20,23 +21,18 @@ public class AskRemote
     public static void write(IfaceRemoteClass remote, String filename, int start, int buffersize){
         try{
 
-            byte[] fileContent=Files.readAllBytes(Paths.get(filename));
-            byte[] partialContent;
-            int fileSize=fileContent.length;
+            File file = new File(filename);
+            FileInputStream fileStream = new FileInputStream(file);
+            byte[] fileContent = new byte[buffersize];
             int bytesReaded = start;
             
-            while(bytesReaded < fileSize){
-                if(buffersize < fileContent.length - bytesReaded){
-                    partialContent = Arrays.copyOfRange(fileContent, bytesReaded, bytesReaded + buffersize);
-                }else {
-                    partialContent = Arrays.copyOfRange(fileContent, bytesReaded, fileContent.length);
-                }
-                System.out.println(partialContent);
+            while(fileStream.available() > 0){
+                int toSend = fileStream.read(fileContent,0,Math.min(buffersize, fileStream.available()));
+                bytesReaded += (int) remote.write(filename, fileContent, toSend);
+                System.out.println(fileContent);
 
-                remote.write(filename, partialContent, partialContent.length);
-                bytesReaded += buffersize;
             }
-            
+            fileStream.close();
             System.out.println("File writed!");
         }catch (Exception e){
             System.out.println(e.toString());
@@ -52,7 +48,8 @@ public class AskRemote
 
             data = remote.read(filename, pos, buffersize);
             pos += data.length;
-            while(data.length > 0){
+            while(data.length == buffersize){
+                System.out.println("Getted " + data);
                 try {
                     Files.write(Paths.get(filename), data, StandardOpenOption.APPEND);
                 }
@@ -64,6 +61,19 @@ public class AskRemote
                 data = remote.read(filename, pos, buffersize);
                 pos += data.length;
             }
+
+            if(data.length > 0){
+                try {
+                    Files.write(Paths.get(filename), data, StandardOpenOption.APPEND);
+                }
+                catch (IOException e) {
+                    Files.createFile(Paths.get(filename));
+                    Files.write(Paths.get(filename), data, StandardOpenOption.APPEND);
+                }
+                data = remote.read(filename, pos, buffersize);
+                pos += data.length;
+            }
+
             System.out.println("File readed!");
         }catch (Exception e){
             System.out.println(e.toString());
