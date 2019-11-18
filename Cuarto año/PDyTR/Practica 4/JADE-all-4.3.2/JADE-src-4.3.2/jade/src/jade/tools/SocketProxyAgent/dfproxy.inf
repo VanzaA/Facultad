@@ -1,0 +1,7 @@
+0
+df
+
+The first line must contain the port number to which the proxy shoud open the
+socket (0 for default).
+The second line must contain the names of all the agents that intends to use 
+this proxy. Names must be separated by blanks.

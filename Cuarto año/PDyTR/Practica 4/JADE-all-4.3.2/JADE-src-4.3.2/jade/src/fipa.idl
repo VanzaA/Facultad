@@ -1,0 +1,116 @@
+/////////////////////////////////////////////////////////////////////
+//
+// JADE - Java Agent DEvelopment Framework is a framework to develop 
+// multi-agent systems in compliance with the FIPA specifications.
+// Copyright (C) 2000 CSELT S.p.A. 
+//
+// GNU Lesser General Public License
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation, 
+// version 2.1 of the License. 
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, write to the
+// Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+// Boston, MA  02111-1307, USA.
+//
+/////////////////////////////////////////////////////////////////////
+
+//  FIPA 2000 compliant IDL interface.
+
+module FIPA {
+
+  // No need for an URL struct, since it's only put in the
+  // message envelope for informational purposes.
+  typedef string URL;
+
+  typedef sequence<string> strings; // a sequence of strings
+
+  // this generic type is used to represent user-defined, non FIPA-defined,
+  // properties that are added to the message envelope in the form of a
+  // keyword and value pair.
+  struct Property {
+    string keyword;
+    any value;
+  };
+
+  struct AgentID {  // Agent Identifier
+    string name;
+    sequence<URL>  addresses;
+    sequence<AgentID>  resolvers;
+    sequence<Property> userDefinedProperties;
+  };
+
+  typedef sequence<AgentID> AgentIDs;  // sequence of Agent Identifiers
+
+  // IDL struct to represent a time stamp. 
+  // It is based on the ISO8601 format with extension for millisecond durations.
+  // The value of the typeDesignator must be a valid 
+  // AlphaCharacter, i.e. ['a'-'z' , 'A'-'Z'], that identifies the timezone.
+  // ISO8601 reports the mapping between typeDesignator and timezone.
+  // The typeDesignator for UTC is the character 'Z'.
+  // If the value of typeDesignator is not an AlphaCharacter, it defaults
+  // to the local timezone.
+  struct DateTime {
+    short year;  // year (e.g. 2000)
+    short month; // between 1 and 12
+    short day;   // between 1 and 31
+    short hour;  // between 0 and 23
+    short minutes; // between 0 and 59
+    short seconds; // between 0 and 59
+    short milliseconds; // between 0 and 999	     
+    char  typeDesignator; // see comment above
+  };
+
+  struct ReceivedObject {
+    URL by;
+    URL from;
+    DateTime date;
+    string id;
+    string via;
+  };
+
+  typedef  sequence<Property> TransportBehaviourType;
+
+  // Using bounded sequences with size of 1 to model optional slots
+  typedef sequence<AgentID, 1> OptAgentID;
+  typedef sequence<DateTime, 1> OptDateTime;
+  typedef sequence<TransportBehaviourType, 1> OptTransportBehaviourType;
+  typedef sequence<ReceivedObject, 1> OptReceivedObject;
+
+  struct Envelope {
+    AgentIDs to;
+    OptAgentID from;
+    string comments;
+    string aclRepresentation;
+    long payloadLength;
+    string payloadEncoding;
+    OptDateTime date;
+    strings encrypted;
+    AgentIDs intendedReceiver;
+    OptReceivedObject received;
+    OptTransportBehaviourType transportBehaviour;
+    sequence<Property> userDefinedProperties; // user-defined properties
+  };
+
+  typedef sequence<Envelope> Envelopes;
+
+  typedef sequence<octet> Payload;
+
+  struct FipaMessage {
+    Envelopes messageEnvelopes;
+    Payload   messageBody;
+  }; 
+
+  interface MTS {
+    oneway void message(in FipaMessage aFipaMessage);
+  };
+
+};

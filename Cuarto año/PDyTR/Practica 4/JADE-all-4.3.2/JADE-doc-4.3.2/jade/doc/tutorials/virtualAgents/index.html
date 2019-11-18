@@ -1,0 +1,302 @@
+<html>
+
+	<head>
+		<meta http-equiv="content-type" content="text/html;charset=iso-8859-1">
+		<meta name="generator" content="Adobe GoLive 5">
+		<title>Virtual Replicated Agents</title>
+		<link rel="stylesheet" href="../cps.css">
+	</head>
+
+	<body bgcolor="#d3d3d3" text="black">
+		<h1>Virtual Replicated Agents Tutorial</h1>
+		<p><i>Author</i>: Giovanni Caire (<a href="http://www.telecomitalia.it/">Telecom Italia S.p.A.</a>)</p>
+		<p><i>Last Modified: </i>March 26, 2013</p>
+		<p><i>Java Platform:</i> <a href="http://java.sun.com/j2se/">Java Standard Edition</a> 6 or later.</p>
+		<p><i><a href="http://jade.tilab.com">JADE </a>version</i>: 4.3 or later.</p>
+		
+		<p>This tutorial is designed to help readers understanding what <b>Virtual Replicated Agents</b> are, where/when they can be 
+		useful and how to implement them. The reader is assumed to be already familiar with JADE main architectural concepts 
+		(platform, containers, main-container, agents ...) and JADE programming. If this is not the case we strongly suggest reading the
+		<a href="../JADEAdmin/index.html">JADE Administration Tutorial</a> and the <a href="../JADEProgramming-Tutorial-for-beginners.pdf">JADE Programming Tutorial</a> first.
+		</p>
+		<p>In order to exemplify how to use Virtual Replicated Agents this tutorial makes use of a simple example whose source code is included 
+		in the JADE examples distribution in package <code>examples.replication</code>.
+		
+		<h2>1. Virtual Replicated Agents Overview</h2>
+		A "<b>Virtual Replicated Agent</b>" (shortly VR agent) is a virtual entity: it is just a name (more precisely an AID) that does not identify a 
+		concrete agent. On the other hand "behind" that name there are one or more concrete agents called the virtual agent <b>Replicas</b>. 
+		As depicted in Figure 1, JADE takes care of dispatching messages directed to the VR agent to a suitable replica. 
+		It should be noticed that each replica agent has its own name that differs from that of the VR agent. 
+		A VR agent does not have a location while of course each replica agent runs on a well-defined container/host.
+		
+		<p><center>
+		<img src="images/virtualReplicatedAgent.png"  border="0"><br>
+		<b>Figure 1. Virtual Replicated Agent</b>
+		</center></p>
+		
+		A simple yet flexible mechanism is provided to keep the internal state of each replica of a VR agent in synch. Therefore VR agents are a 
+		powerful mean to achieve <b>scalability</b> and <b>fault tolerance</b>. For instance, with reference to Figure 1, all requests sent to 
+		VR agent A are automatically dispatched partly to replica A-R1 and partly to replica A-R2. Now let's assume that Container-1
+		where replica A-R1 is running suddenly crashes. Other agents interacting with VR agent A do not even realize that, since all messages will be 
+		automatically dispatched by JADE to replica A-R2 only.<br>
+		<br>
+		The first replica of a VR agent is called the <b>master</b> replica. Other replicas can be created at whatever point in time and their internal state 
+		is copied from that of the master replica. Furthermore the master replica is notified about addition and removal of other replicas.<br>
+		<br>
+		VR agents require the <b>Agent Replication Service</b> (class <code>jade.core.replication.AgentReplicationService</code>) and the 
+		Agent Mobility Service in all containers of the platform. The first one actually provides replication features, while the second one is used to 
+		clone the master replica when a new replica must be created. 
+		
+		
+		<h2>2. The Value Provider Agent example</h2>
+		In this section we describe the Value Provider Agent example that is used to illustrate how to use Virtual Replicated Agents 
+		and we show how to launch and try it. The code of the Value Provider Agent example, that is included in the 
+		<code>examples.replication</code> package of the Jade examples distribution, will be presented in next section.
+		<br>
+		The example is composed of two agents:
+		<ol>
+			<li>The <b>ValueProviderAgent</b> - This agent has a minimal internal state composed of a numeric value. A simple GUI, shown in 
+				Figure 2, with a slider allows setting the numeric value. It is possible to request the ValueProviderAgent to provide its 
+				internal numeric value by means of the <code>GetValue</code> action of the <code>ValueManagementOntology</code>. 
+				This is the agent that actually shows the usage of Virtual Replicated agents: it defines itself as the master replica of a 
+				Virtual Replicated agent and includes a button to create new replicas. Only the master replica keeps its GUI visible.</li>
+			<li>The <b>ValueReaderAgent</b> - This agent periodically requests the Virtual Replicated Value Provider Agent to 
+				provide its internal numeric value and prints it on the standard output. Its purpose is just to show that, regardless of which 
+				replica a request is dispatched to, the returned value is actually that shown in the master replica GUI. 
+				Furthermore replicas (including the master) can be killed and 
+				created at will without affecting the responses received by the ValueReaderAgent at all.</li>
+		</ol>
+		
+		<p><center>
+		<img src="images/valueProviderAgentGUI.png"  border="0"><br>
+		<b>Figure 2. The Value Provider Agent GUI</b>
+		</center></p>
+		
+		In order to try the Value Provider Agent example follow the steps below:
+		<ol>
+			<li>Download Jade in binary form (<b>jadeBin</b>) plus the jade examples (<b>jadeExamples</b>) and unzip them in the same directory thus 
+			obtaining the following directory structure<br>
+			<pre>
+...
+ |--jade/
+      |--...
+      |--lib/
+          |--jade.jar
+          |--jadeExamples.jar
+          |--...
+      |
+      |--src/
+          |--...
+          |--examples/
+                |--...
+                |--replication/
+                |-- sources of the Value Provider Agent example		
+			</pre>	  
+			</li>
+			
+			<li>Open a shell (a DOS prompt in windows), move to the <code>jade</code> directory and launch the Main Container with the 
+			ValueProviderAgent and ValueReaderAgent on top by typing<br>
+			<br>
+			<code>java -cp lib/jade.jar;lib/jadeExamples.jar jade.Boot -gui -services jade.core.event.NotificationService;jade.core.mobility.AgentMobilityService;jade.core.replication.AgentReplicationService -agents provider:examples.replication.ValueProviderAgent;reader:examples.replication.ValueReaderAgent</code><br>
+			<br>
+			<i>NOTE: In a UNIX-like environment the ':' character must be used (instead of ';') as a separator between classpath elements. 
+			Furthermore the ';' used to separate services and agents must be escaped (\;)</i><br>
+			<br>
+			Refer to the <a href="../..administratorsguide.pdf">JADE Administrator's Guide</a> for details about JADE command line syntax and options.<br>
+			<br>
+			</li>
+			
+			<li>Move the slider in the ValueProviderAgent GUI and verifies that the ValueReaderAgent prints the expected value on the standard output
+			</li>
+			
+			<li>Open a new shell move to the <code>jade</code> directory and launch a peripheral container by typing<br>
+			<br>
+			<code>java -cp lib/jade.jar;lib/jadeExamples.jar jade.Boot -container -services jade.core.event.NotificationService;jade.core.mobility.AgentMobilityService;jade.core.replication.AgentReplicationService</code><br>
+			<br>
+			</li>
+
+			<li>Now, by means of the "Create Replica" button of the ValueProviderAgent GUI, create a new replica in the newly created peripheral container.<br>
+			Modify again the internal numeric value by moving the slider: looking at the messages printed on the standard output, you may notice that
+				<ul>
+				<li>The internal numeric value of the newly created replica is updated too.</li>
+				<li>Requests to get the numeric value sent by the ValueReaderAgent are automatically distributed on both replicas</li>
+				</ul>
+			</li>
+			
+			<li>Finally kill the master replica by means of the Jade Administration GUI. The GUI disappears and immediately re-appears. This is
+			because the replica running on Container-1 becomes the new master replica and reacts to this event by making its GUI visible.<br> 
+			Furthermore requests sent by the ValueReaderAgent are fully directed to the replica on Container-1 so that the ValueReaderAgent does not
+			even realize that the old master replica suddenly disappeared.
+			</li>
+		</ol>
+				  
+			
+		<h2>3. Virtual Replicated Agent code</h2>
+		In this section we look into the ValueProviderAgent code to see how the behaviour described in Chapter 2 is achieved.<br>
+		
+		<h3>3.1. Defining a Virtual Replicated Agent</h3>
+		
+		The code snippet below shows the <code>setup()</code> and <code>takeDown()</code> methods.<br> 
+		<pre>
+ 1	public class ValueProviderAgent extends Agent implements AgentReplicationHelper.Listener {
+ 2 	
+ 3 		private transient ValueProviderAgentGui myGui;
+ 4		private int myValue = 0;
+ 5 	
+ 6		@Override
+ 7		protected void setup() {
+ 8			try {
+ 9				// Makes this agent become the master replica of a newly defined replicated agent
+10				AgentReplicationHelper helper = (AgentReplicationHelper) getHelper(AgentReplicationHelper.SERVICE_NAME);
+11				AID virtualAid = helper.makeVirtual(getLocalName()+"_V", AgentReplicationHelper.HOT_REPLICATION);
+12
+13				// Register to the DF. 
+14				// NOTE: we use the virtual agent AID (not the concrete agent AID).
+15				// In this way requests from remote agents will be automatically spread across 
+16				// all replicas to achieve load balancing and fault tolerance.
+17				DFAgentDescription dfad = new DFAgentDescription();
+18				dfad.setName(virtualAid);
+19				ServiceDescription sd = new ServiceDescription();
+20				sd.setType("ValueProvider");
+21				sd.setName("VirtualValueProvider");
+22				dfad.addServices(sd);
+23				DFService.register(this, dfad);
+24			
+25				// Register required ontologies and language codecs
+26				getContentManager().registerLanguage(new SLCodec());
+27				getContentManager().registerOntology(ValueManagementOntology.getInstance());
+28
+29				// Add the behaviour serving requests to read our current value
+30				addBehaviour(new OntologyServer(this, ValueManagementOntology.getInstance(), ACLMessage.REQUEST, this));
+31			
+32				// Show the GUI that allows the user to set the value and to create other replicas
+33				myGui = new ValueProviderAgentGui(this, myValue);
+34				myGui.setVisible(true);
+35			}
+36			catch (ServiceException se) {
+37				System.out.println("Agent "+getLocalName()+" - Error retrieving AgentReplicationHelper!!! Check that the AgentReplicationService is correctly installed in this container");
+38				se.printStackTrace();
+39				doDelete();
+40			}
+41			catch (FIPAException fe) {
+42				System.out.println("Agent "+getLocalName()+" - Error registering with the DF");
+43				fe.printStackTrace();
+44				doDelete();
+45			}
+46		}
+47	
+48		@Override
+49		protected void takeDown() {
+50			// Close the GUI (if present) when the agent terminates
+51			if (myGui != null) {
+52				myGui.dispose();
+53			}
+54		}
+		</pre>
+		Let's focus first on lines 10 and 11. The first instruction retrieves the ServiceHelper of the AgentReplicationService. The second one allows 
+		declaring that this agent is the master replica of a Virtual Replicated Agent. The <code>HOT_REPLICATION</code> parameter
+		specifies that messages directed to the VR agent will be dispatched indifferently to all available replicas. If <code>COLD_REPLICATION</code>
+		was used, all messages would have been dispatched to the master replica only (other replicas used for fault tolerance purpose only).<br>
+		The <code>makeVirtual()</code> method returns the AID of the VR agent. This is the AID to publish e.g. in DF registrations (see lines from
+		13 to 23) to exploit the Virtual Replicated Agent mechanism.<br>
+		Lines from 24 to 46 register required languages and ontologies, activate the behaviour 
+		serving requests to get the internal value (note the use of the <code>OntologyServer</code> behaviour: see the related Javadoc for details)
+		and show the GUI.<br>
+		Lines from 48 to 54 conntains the <code>takeDown()</code> method where the GUI (if any) is closed.<br>
+		<br>
+		
+		<h3>3.2. Creating new replicas</h3>
+		
+		The folowing code snippet shows the method that is called when the user clicks on the Create Replica button of the ValueProviderAgent GUI and 
+		selects a name and a location for the new replica.
+		<pre>
+ 1		void createReplica(String replicaName, String where) {
+ 2			if (replicaName == null || replicaName.trim().length() == 0) {
+ 3				System.out.println("Replica name not specified");
+ 4				return;
+ 5			}
+ 6			if (where == null || where.trim().length() == 0) {
+ 7				System.out.println("Replica location not specified");
+ 8				return;
+ 9			}
+10			try {
+11				AgentReplicationHelper helper = (AgentReplicationHelper) getHelper(AgentReplicationHelper.SERVICE_NAME);
+12				helper.createReplica(replicaName.trim(), new ContainerID(where.trim(), null));
+13			}
+14			catch (Exception e) {
+15				System.out.println("Agent "+getLocalName()+" - Error creating replica on container "+where);
+16				e.printStackTrace();
+17			}
+18		}
+		</pre>
+		Lines from 2 to 9 just perform checks on the name and location inserted by the user. The <code>createReplica()</code> method of the 
+		<code>AgentReplicationHelper</code> does the real job. As mentioned the actual replica creation is done by cloning the master replica.
+		As a consequence
+		<ul>
+		<li>The agent must be fully Serializable</li>
+		<li>The <code>afterClone()</code> method must be redefined to re-initialize transient fields such as registered content languages and ontologies</li>
+		</ul>
+		The following code snippet shows the <code>afterClone()</code> method. 
+		<pre>
+ 1		@Override
+ 2		public void afterClone() {
+ 3			// New replicas are created cloning the master replica.
+ 4			// Just after cloning restore transient field such as registered ontologies and language codecs
+ 5			System.out.println("Agent "+getLocalName()+" - Alive");
+ 6			getContentManager().registerLanguage(new SLCodec());
+ 7			getContentManager().registerOntology(ValueManagementOntology.getInstance());
+ 8		}
+		</pre>
+		
+		<h3>3.3. Keeping replicas in synch</h3>
+		
+		The following code snippet shows the method that is called by the GUI whenever the slider sets the internal numeric value. In this minimal 
+		scenario, such value, held in the <code>myValue</code> field of the ValueProviderAgent class, fully represents the internal state of the
+		agent.
+		<pre>
+ 1		public void setValue(int newValue) {
+ 2			// The call to setValue() will be invoked on other replicas too 
+ 3			AgentReplicationHandle.replicate(this, "setValue", new Object[]{newValue});
+ 4			
+ 5			myValue = newValue;
+ 6			System.out.println("Agent "+getLocalName()+": VALUE = "+myValue);
+ 7		}
+		</pre>
+		
+		Line 3 in particular ensures that the <code>setValue()</code> method is called on all other replicas. Therefore the <b>synchronization
+		of all replicas of a Virtual Replicated Agent is achieved by replicating calls to methods that are expected to modify the internal state 
+		of the agent</b>. It is responsibility of the programmer to define which call to replicate and how.<br>
+		It is interesting to note that the <code>replicate()</code> method is not called on the AgentReplicationHelper, as happened for other features
+		of the Virtual Replicated Agent mechanism, but is provided as a static method of a utility class <code>AgentReplicationHandle</code>. This
+		is done to allow calling that method transparently even when the AgentReplicationService is not installed (of course in that case the
+		method has no effect). In this way it is possible to design an agent to exploit the Virtual Replicated Agent mechanism, but to turn 
+		replication on only when actually needed.
+		
+		<h3>3.4. Handling replicas related events</h3>
+		
+		Looking at line 1 in the first code snippet presented in section 3.1, it is possible to note that the <code>ValueProviderAgent</code>
+		class implements the <code>AgentReplicationHelper.Listener</code> interface. This tells the underlying AgentReplication Service that
+		the master replica will have to be notified whenever a replica related event happens. This is done invoking the methods of the 
+		<code>AgentReplicationHelper.Listener</code> interface.
+		<ol>
+		<li><code>replicaAdded()</code> - Notifies the master replica that a new replica has been successfully created. Note that the replica creation 
+		process occurrs asynchronously.</li> 
+		<li><code>replicaCreationFailed()</code> - Notifies the master replica that the creation of a new replica has failed.</li> 
+		<li><code>replicaRemoved()</code> - Notifies the master replica that an existing replica has daid.</li> 
+		<li><code>becomeMaster()</code> - Notifies the <b>newly selected</b> master replica that the previous master replica has daid.</li>
+		</ol>
+		The code snippet below shows the implementation of the <code>becomeMaster()</code> method where the newly selected master replica shows
+		its GUI.
+		
+		<pre>
+ 1		@Override
+ 2		public void becomeMaster() {
+ 3			// The old master replica is dead. I'm the new master replica --> Show the GUI
+ 4			System.out.println("Agent "+getLocalName()+" - I'm the new master replica");
+ 5			myGui = new ValueProviderAgentGui(this, myValue);
+ 6			myGui.setVisible(true);
+ 7		}
+		</pre>
+	</body>
+
+</html>

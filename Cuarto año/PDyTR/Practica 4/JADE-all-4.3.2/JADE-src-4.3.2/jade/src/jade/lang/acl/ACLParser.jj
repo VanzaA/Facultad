@@ -1,0 +1,446 @@
+/*****************************************************************
+JADE - Java Agent DEvelopment Framework is a framework to develop 
+multi-agent systems in compliance with the FIPA specifications.
+Copyright (C) 2000 CSELT S.p.A. 
+
+GNU Lesser General Public License
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation, 
+version 2.1 of the License. 
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the
+Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+Boston, MA  02111-1307, USA.
+*****************************************************************/
+
+/*  
+   ACLParser.jj is the Grammar File of the FIPA ACL.
+     To generate the Java source code: javacc ACLParser.jj
+     To compile the Java source code:  javac  ACLParser*.java
+     To run the parser:                cd ..; java ACLParser.ACLParser < TestMessagges.txt
+
+   Known bugs and/or limitations:
+   - MIME Extension not supported
+   - Content is parsed according to the ACL Grammar and not the Content Language Grammar
+*/
+
+options {
+  LOOKAHEAD = 1;	      
+  CHOICE_AMBIGUITY_CHECK = 2;
+  OTHER_AMBIGUITY_CHECK = 1;
+  STATIC = false;
+  DEBUG_PARSER = false;
+  DEBUG_LOOKAHEAD = false;
+  DEBUG_TOKEN_MANAGER = false;
+  ERROR_REPORTING = true;
+  JAVA_UNICODE_ESCAPE = false;
+  UNICODE_INPUT = true;
+  IGNORE_CASE = true;
+  USER_TOKEN_MANAGER = false;
+  USER_CHAR_STREAM = false;
+  BUILD_PARSER = true;
+  BUILD_TOKEN_MANAGER = true;
+  SANITY_CHECK = true;
+  FORCE_LA_CHECK = true;	// Force LookAhead Cecking
+}
+
+PARSER_BEGIN(ACLParser)
+
+package jade.lang.acl;
+
+//#APIDOC_EXCLUDE_FILE
+
+
+import java.io.*;
+import jade.core.AID;
+
+/**
+Javadoc documentation for the file
+@author Fabio Bellifemine - CSELT S.p.A
+@version $Date: 2005-04-15 17:50:12 +0200 (ven, 15 apr 2005) $ $Revision: 5671 $
+*/
+
+public class ACLParser {
+  ACLMessage msg = new ACLMessage(ACLMessage.NOT_UNDERSTOOD);
+
+  public static void main(String args[]) throws ParseException {
+    ACLParser parser = new ACLParser(System.in);
+    
+    while (true) {
+      try {
+	ACLMessage result = parser.Message();
+	System.out.println(result);
+      }
+      catch(ParseException pe) {
+	pe.printStackTrace();
+	System.exit(1);
+      }
+    }
+  }
+
+  public static ACLParser create() {
+    Reader r = new StringReader("");
+    return new ACLParser(r);
+  }
+
+  public ACLMessage parse(Reader text) throws ParseException {
+    ReInit(text);
+    return Message();
+  }
+
+  public AID parseAID(Reader text) throws ParseException {
+    if(text != null) {
+      ReInit(text);
+    }
+
+    token_source.SwitchTo(AIDSTATE);
+    AID result = AgentIdentifier();
+    token_source.SwitchTo(DEFAULT);
+    return result;
+  }
+
+  private String trimQuotes(String s) throws ParseException {
+    s = s.trim();
+    if(s.startsWith("\"") && (s.endsWith("\"")))
+      s = s.substring(1, s.length() - 1);
+    return unescape(s);
+  }
+
+  private String unescape(String s) throws ParseException {
+    StringBuffer result = new StringBuffer(s.length());
+    int i;
+    for( i=0; i<s.length()-1; i++) {
+      if( s.charAt(i) == '\\' && s.charAt(i+1) == '\"' ) {
+	  		result.append("\"");
+	  		i++;
+			}
+      else {
+				result.append(s.charAt(i));
+      }
+    }
+    // NOTE: if s terminates with \" (this is the case when i == s.length()) the 
+    // last character should not be appended as it has already been considered.
+    if( i < s.length() ) {
+	    result.append(s.charAt(s.length()-1));
+    }
+    return result.toString();
+  }
+
+}
+
+PARSER_END(ACLParser)
+
+ACLMessage Message() :
+{  msg.reset(); }
+{
+  <START> MessageType() (MessageParameter())* <END>  
+ {
+   return msg;
+ }
+}
+
+void MessageType() :
+{ Token t; }
+{
+  t= <MESSAGETYPE> 	{ msg.setPerformative(ACLMessage.getInteger(t.image));}
+}
+
+
+void MessageParameter() :
+{ String s; Token t; AID aid;}
+{
+  <SENDER>          aid=AgentIdentifier()			{ msg.setSender(aid); token_source.SwitchTo(MESSAGEPARAMETERSTATE);}
+| <RECEIVER>        {msg.clearAllReceiver();}
+        <LBRACE2> <SET> (aid=AgentIdentifier() {msg.addReceiver(aid);})* <RBRACE2> 
+        { token_source.SwitchTo(MESSAGEPARAMETERSTATE);}
+| <CONTENT>         s=Content()			{ msg.setContent(s); token_source.SwitchTo(MESSAGEPARAMETERSTATE);}
+| <REPLY_WITH>      s=Expression()			{ msg.setReplyWith(s); token_source.SwitchTo(MESSAGEPARAMETERSTATE);}
+| <REPLY_BY>        s=DateTimeToken()		{ try { msg.setReplyByDate(ISO8601.toDate(s));} catch (Exception e) {} token_source.SwitchTo(MESSAGEPARAMETERSTATE);}
+| <IN_REPLY_TO>     s=Expression()			{ msg.setInReplyTo(s); token_source.SwitchTo(MESSAGEPARAMETERSTATE);}
+| <REPLY_TO>       {msg.clearAllReplyTo();}
+      <LBRACE2> <SET> (aid=AgentIdentifier() {msg.addReplyTo(aid);})* <RBRACE2>
+      { token_source.SwitchTo(MESSAGEPARAMETERSTATE);}
+| <ENCODING>        s=Expression()		{ msg.setEncoding(s); token_source.SwitchTo(MESSAGEPARAMETERSTATE);}
+| <LANGUAGE>        s=Expression()			{ msg.setLanguage(s); token_source.SwitchTo(MESSAGEPARAMETERSTATE);}
+| <ONTOLOGY>        s=Expression()			{ msg.setOntology(s); token_source.SwitchTo(MESSAGEPARAMETERSTATE);}
+| <PROTOCOL>        s=Word()				{ msg.setProtocol(s); token_source.SwitchTo(MESSAGEPARAMETERSTATE);}
+| <CONVERSATION_ID> s=Expression()			{ msg.setConversationId(s); token_source.SwitchTo(MESSAGEPARAMETERSTATE);}
+| t=<USERDEFINEDPARAM> s=Expression()			{ msg.addUserDefinedParameter(t.image.substring(3),s); token_source.SwitchTo(MESSAGEPARAMETERSTATE);}
+}
+
+String Content():
+
+{ String s;}
+{
+  s = Stringa() { return s; }
+| s = Word()    { return s; } 
+}
+
+AID AgentIdentifier():
+{Token t; String s; AID aid; 
+ AID cur = new AID();}
+{
+<LBRACE2> <AID> 
+ (
+//    (<NAME> s=Word() { cur.setName(s); token_source.SwitchTo(AIDSTATE);})
+    (<NAME> s=Content() { cur.setName(s); token_source.SwitchTo(AIDSTATE);})
+  | (<ADDRESSES> <LBRACE2> <SEQUENCE> {token_source.SwitchTo(CONTENTSTATE);} 
+       (s=Word() {cur.addAddresses(s);} )* <RBRACE> 
+       {token_source.SwitchTo(AIDSTATE);})
+  | (<RESOLVERS> <LBRACE2> <SEQUENCE> 
+       (aid=AgentIdentifier() {cur.addResolvers(aid);})* <RBRACE2> 
+       {token_source.SwitchTo(AIDSTATE);})
+  | (t=<USERDEFINEDSLOT> s=Expression() 
+       {cur.addUserDefinedSlot(t.image.substring(3),s); token_source.SwitchTo(AIDSTATE);})
+ )+
+<RBRACE2>
+{return cur;}
+}
+
+
+String Expression():
+{ String s; String s1=new String(); }
+{ 
+  s=Word()						{return s;}
+| s=Stringa()					{return s;}
+| s=Number()					{return s;}
+| s=DateTimeToken()	{return s;}
+| <LBRACE> ( s=Expression() {s1+=(s+" ");} )* <RBRACE>		{return "("+s1+")";}
+}
+
+
+
+
+
+
+
+
+String Word():
+{ Token t; }
+{ 
+  t=<WORD>	{ return trimQuotes(t.image); }
+}
+
+
+String Stringa():
+{ String s; }
+{ 
+  s=StringLiteral()			{return s;}
+| s=ByteLengthEncodedString() 	{return s;}
+}
+
+
+String StringLiteral():
+{ Token t; }
+{ 
+  t=<STRINGLITERAL>			{return trimQuotes(t.image);}
+}
+
+
+String ByteLengthEncodedString():
+{ Token t; /* int i=0; char c; */}
+{ 
+  t=<PREFIXBYTELENGTHENCODEDSTRING>  {return t.image;}
+}
+
+
+String Number():
+{ String s;}
+{ 
+  s=Digit()			{return s;}
+| s=Integer()			{return s;}
+| s=Float() 			{return s;}
+}
+
+
+String DateTimeToken():
+{ Token t; String s;}
+{ 
+  t=<DATETIME>				{return t.image;} 
+}
+
+
+String Digit():
+{ Token t;}
+{ 
+  t=<DIGIT>				{return t.image;}
+}
+
+
+String Integer():
+{ Token t; String s=new String();}
+{ 
+  // (t="+" {s+=t.image;} | t="-" {s+=t.image;})? ( t=<DIGIT> {s+=t.image;} )+	{return s;}*/
+  t=<INTEGER>	{return t.image;}
+}
+
+String Float():
+{ Token t;}
+{ 
+  t=<FLOATONE>			{return t.image;}
+| t=<FLOATTWO>			{return t.image;}
+}
+
+
+
+<DEFAULT>
+SKIP :
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+}
+
+<DEFAULT>
+TOKEN:
+{
+  <START : "("> : MESSAGETYPESTATE 
+}
+
+<MESSAGETYPESTATE>
+SKIP :
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+}
+
+<MESSAGETYPESTATE>
+TOKEN:
+{
+  <MESSAGETYPE :  "accept-proposal"
+                | "agree"		
+                | "cancel"	
+                | "cfp"			
+                | "confirm"	
+                | "disconfirm"	
+                | "failure"		
+                | "inform"		
+                | "inform-if"		
+                | "inform-ref"	
+                | "not-understood"	
+                | "propose"		
+                | "proxy"		
+                | "propagate"		
+                | "query-if"	
+                | "query-ref"	
+                | "refuse"		
+                | "reject-proposal"
+                | "request"		
+                | "request-when"	
+                | "request-whenever"	
+                | "subscribe"	>        : MESSAGEPARAMETERSTATE
+}	
+
+<MESSAGEPARAMETERSTATE>
+SKIP :
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+}
+
+<MESSAGEPARAMETERSTATE>
+TOKEN:
+{
+  <SENDER :          ":sender" >          : AIDSTATE
+| <RECEIVER :        ":receiver" >        : AIDSTATE
+| <CONTENT :         ":content" >         : CONTENTSTATE
+| <REPLY_WITH :      ":reply-with" >      : CONTENTSTATE
+| <REPLY_BY :        ":reply-by" >        : CONTENTSTATE
+| <IN_REPLY_TO:      ":in-reply-to" >     : CONTENTSTATE
+| <REPLY_TO:         ":reply-to" >        : AIDSTATE
+| <ENCODING :        ":encoding" >        : CONTENTSTATE
+| <LANGUAGE :        ":language" >        : CONTENTSTATE
+| <ONTOLOGY :        ":ontology" >        : CONTENTSTATE
+| <PROTOCOL :        ":protocol" >        : CONTENTSTATE
+| <CONVERSATION_ID : ":conversation-id" > : CONTENTSTATE
+| <USERDEFINEDPARAM : ":" ["X","x"] "-" 
+                      (~["\u0000"-"\u001F"," ","(",")"])+ > : CONTENTSTATE
+| <END :             ")" >                : DEFAULT
+}
+
+<CONTENTSTATE>
+SKIP :
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+}
+
+<CONTENTSTATE>
+TOKEN:
+{
+  < DATETIME :(["+","-"])? (["0"-"9"]) (["0"-"9"]) (["0"-"9"]) (["0"-"9"])
+                           (["0"-"9"]) (["0"-"9"]) (["0"-"9"]) (["0"-"9"]) ["t","T"]
+                           (["0"-"9"]) (["0"-"9"]) (["0"-"9"]) (["0"-"9"])
+                           (["0"-"9"]) (["0"-"9"]) (["0"-"9"]) (["0"-"9"]) (["0"-"9"]) (["a"-"z","A"-"Z"])? > 
+|  < WORD :          ["!" , "\"" , "$"-"'" , "*" , "+" , "," , "." , "/" , ":"-"~"] (["*"-"~","!"-"'"])* >
+| <STRINGLITERAL: "\"" (~["\""] | "\\" (["n","t","b","r","f","\\","\'","\""] | ["0"-"7"] (["0"-"7"])? | ["0"-"3"] ["0"-"7"] ["0"-"7"]))* "\""> 
+| < DIGIT :         ["0"-"9"] >
+| < INTEGER :       (["+","-"])? (["0"-"9"])+ >
+| < FLOATONE :      (["+","-"])? ((["0"-"9"])+ "." (["0"-"9"])* | (["0"-"9"])* "." (["0"-"9"])+)
+                    (["e","E"] (["-","+"])? (["0"-"9"])+)? >
+| < FLOATTWO :      (["+","-"])? (["0"-"9"])+ ["e","E"] (["-","+"])? (["0"-"9"])+  >
+| <PREFIXBYTELENGTHENCODEDSTRING :  "#" <INTEGER> "\"" > 
+         {
+            String tmp = matchedToken.image.substring(1,  
+                                      matchedToken.image.length() - 1);
+            int numBytes = Integer.parseInt(tmp);
+		if (numBytes < 0) 
+               throw new TokenMgrError("ERROR: PrefixByteLengthEncodedString with length < 0", TokenMgrError.STATIC_LEXER_ERROR);
+            char[] bytes = new char[numBytes];
+            int i = 0; 
+	 	
+            while (numBytes-- > 0) 
+			try {
+	                bytes[i++] = input_stream.readChar(); 
+			} catch (IOException e) {
+                        System.out.println("IOException during PREFIXBYTELENGTHENCODEDSTRING");
+                        throw new TokenMgrError(true, curLexState, input_stream.getEndLine(), input_stream.getEndColumn(),input_stream.GetImage(), curChar, TokenMgrError.LEXICAL_ERROR);
+			}	
+            // If you want, you can add bytes to matchedToken.image here.
+		matchedToken.image = new String(bytes);
+         }
+ | <RBRACE : ")" >
+ | <LBRACE : "(" >
+}
+
+<AIDSTATE>
+SKIP :
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+}
+
+<AIDSTATE>
+TOKEN:
+{
+  <SET:       "set"        >
+| <SEQUENCE:  "sequence"   >
+| <AID:       "agent-identifier"  >
+| <NAME:      ":name"      > : CONTENTSTATE 
+| <ADDRESSES: ":addresses" > 
+| <RESOLVERS: ":resolvers" > 
+| <USERDEFINEDSLOT : ":" ["X","x"] "-" 
+                      (~["\u0000"-"\u001F"," ","(",")"])+ >  : CONTENTSTATE
+| <RBRACE2 : ")" >
+| <LBRACE2 : "(" >
+}
+
+
+

@@ -1,0 +1,16 @@
+README file for JADE $Name$ - Example programs.
+
+Some example programs are provided with JADE, to show various
+framework features and suggested programming idioms.  To run the
+examples, you must set CLASSPATH environment variable to contain the
+file jade.jar, jadeTools.jar, Base64.jar and iiop.jar and the current directory ('.').
+Then change to 'src' directory and refer to the various example agents
+with a fully qualified package name; all example agent classes belong
+to subpackages of the 'examples' package: for example, class ComplexBehaviourAgent
+in 'behaviours' subdirectory of 'examples' directory must be started 
+by the jade/src directory with:
+
+      java jade.Boot -gui a1:examples.behaviours.ComplexBehaviourAgent
+
+
+Refer to the documentation for a description of the provided examples. 

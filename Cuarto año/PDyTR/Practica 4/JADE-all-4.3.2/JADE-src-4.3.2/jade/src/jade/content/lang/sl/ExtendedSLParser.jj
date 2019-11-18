@@ -1,0 +1,712 @@
+/*****************************************************************
+JADE - Java Agent DEvelopment Framework is a framework to develop 
+multi-agent systems in compliance with the FIPA specifications.
+Copyright (C) 2000 CSELT S.p.A. 
+
+GNU Lesser General Public License
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation, 
+version 2.1 of the License. 
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the
+Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+Boston, MA  02111-1307, USA.
+*****************************************************************/
+
+options {
+//  LOOKAHEAD = 1;	      
+//  CHOICE_AMBIGUITY_CHECK = 2;
+//  OTHER_AMBIGUITY_CHECK = 1;
+  STATIC = false;
+//  DEBUG_PARSER = true;
+//  DEBUG_LOOKAHEAD = true;
+//  DEBUG_TOKEN_MANAGER = true;
+  ERROR_REPORTING = true;
+//  JAVA_UNICODE_ESCAPE = true;
+  UNICODE_INPUT = true;
+  IGNORE_CASE = true;
+//  USER_TOKEN_MANAGER = false;
+//  USER_CHAR_STREAM = false;
+//  BUILD_PARSER = true;
+//  BUILD_TOKEN_MANAGER = true;
+//  SANITY_CHECK = true;
+//  FORCE_LA_CHECK = true;	// Force LookAhead Checking
+}
+
+PARSER_BEGIN(ExtendedSLParser)
+
+package jade.content.lang.sl;
+
+import jade.content.abs.*;
+import jade.content.onto.Ontology;
+import jade.core.CaseInsensitiveString;
+import jade.content.lang.Codec;
+
+import java.io.ByteArrayInputStream;
+import java.io.StringReader;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+
+import java.util.Date;
+
+import org.apache.commons.codec.binary.Base64;
+
+
+/**
+* ExtendedSLParser. This same parser embeds also lower profiles of SL, namely SL-0, SL-1 and SL-2.
+* @author Fabio Bellifemine, TILab S.p.A. (formerly CSELT S.p.A.)
+* @author Nicolas Lhuillier (Motorola) (added support for PREFIXBYTELENGTHENCODEDSTRING)
+* @version $Date: 2005-05-13 18:14:10 +0200 (Fri, 13 May 2005) $ $Revision: 5696 $
+**/
+class ExtendedSLParser {
+
+  private static final String META_EXCEPTION_MESSAGE = "Meta SL expressions are not allowed";
+		/** This variable is true, when meta symbols are allowed (metas are a semantics-specific extension to the SL Grammar) **/
+		private boolean metaAllowed = true; //FIXME to do set/unset this variable 
+
+     /* Take a quoted FIPA SL0 String and convert to a 
+      * normal Java-style String.  Remove the
+      * leading/trailing quotation marks, and
+      * un-escape any included quotation marks.
+      * This must be the exact inverse of the 
+      * escape() procedure in the SLEncoder.
+     */
+     private String unescape(String s) {
+          StringBuffer result = new StringBuffer(s.length());
+          for( int i=1; i<s.length()-1; i++)
+          	if( s.charAt(i) == '\\' && s.charAt(i+1) == '\"' ) {
+                  result.append("\"");
+                  i++;
+                } else
+                  result.append(s.charAt(i));
+                return result.toString();
+     }
+
+
+     /**
+     * When an ActionExpression is parsed, if it is an AbsConcept then
+     * it must be casted upto an AbsAgentAction. 
+     **/
+     private AbsTerm toAbsAgentAction(AbsTerm t) {
+     	if ((t instanceof AbsConcept) && (!(t instanceof AbsAgentAction))) {
+     		AbsAgentAction act = new AbsAgentAction(t.getTypeName());
+     		String[] slotNames = t.getNames();
+     		if (slotNames != null) {
+     			for (int i=0; i<slotNames.length; i++)
+     				act.set(slotNames[i], (AbsTerm) t.getAbsObject(slotNames[i]));
+     		}
+     		return act;
+     	} else
+     		return t;
+     }
+     
+  /**
+   * By default an object of this type implements a Full ExtendedSLParser.
+   * This method allows to change this default.
+   * @param slType (0 for FIPa-SL0, 1 for SL1, 2 for SL2, >2 for full SL) 
+  **/ 
+  void setSLType(int slType) {
+     this.slType = slType;
+  }
+
+  
+  Ontology curOntology = null;
+  /**
+   * Reinitialize the parser such as it is ready to parse a new expression.
+   * @param content the content to be parsed
+   * @param o the ontology, null if no ontology (this parameter is used to get the names of the slots
+   * when they are encoded as unnamed slots.
+  */
+  void reinit(Ontology o, String content) {
+    curOntology = o;
+    if (content == null) content = new String();
+    ReInit(new StringReader(content));
+  }
+
+  /**
+   * @param content the content to be parsed
+   * @param o the ontology, null if no ontology (this parameter is used to get the names of the slots
+   * when they are encoded as unnamed slots.
+   * @deprecated since JADE 3.4 it is preferrable to use reinit() and then call directly the method corresponding to the production rule (e.g. Content())
+  */
+  AbsContentElement parse(Ontology o, String content) throws ParseException, TokenMgrError{
+	  reinit(o, content);
+    AbsContentElementList tuple = Content();
+    if (tuple.size() > 1)
+      return tuple;
+    else  // if there is a single ContentExpression than return just it, not the tuple
+      return tuple.get(0);
+  }
+
+  /** (0 for FIPa-SL0, 1 for SL1, 2 for SL2, >2 for full SL) **/
+  int slType=3;
+
+  public static void main(String[] args) {
+
+    ExtendedSLParser theParser = null;  
+    try {
+      theParser = new ExtendedSLParser(System.in);
+      theParser.setSLType(Integer.parseInt(args[0]));
+    } catch (Exception e) {
+      System.out.println("usage: ExtendedSLParser SLLevel\n  where SLLevel can be 0 for SL0, 1 for SL1, 2 for SL2, 3 or more for full SL");
+      System.exit(0);
+    }
+    if (theParser.slType < 3)
+       System.out.println("SL-"+theParser.slType+" Parser Started ...");
+    else
+       System.out.println("Full-SL"+" Parser Started ...");
+
+    SLCodec codec = new SLCodec();
+    //Ontology o = new DefaultOntology();
+
+    while (true) {
+	System.out.println("insert an SL expression to parse: ");
+      try {
+	AbsContentElementList result = theParser.Content();
+  String resultEncoded = codec.encode(result);
+	System.out.println("\n\n RESULT of ExtendedSLParser.Content()=\n"+resultEncoded); 
+  AbsContentElement result2 = codec.decode(resultEncoded);
+	System.out.println("\n\n RESULT of SLCodec.decode(SLCodec.encode(ExtendedSLParser.Content()))=\n"+codec.encode(result2)); 
+	System.out.println("\n\n");
+	//result.dump();
+	//System.out.println("AFTER ENCODING: "+codec.encode(result,o));
+      }
+      catch(Exception pe) {
+	pe.printStackTrace();
+	System.exit(0);
+      }
+    }
+  }
+
+}
+ 
+PARSER_END(ExtendedSLParser)
+
+
+
+
+
+
+/*   P R O D U C T I O N    R U L E S  */
+
+/**
+* This production rule represents the more general expression that can
+* serve as content for an ACL message. Since different communicative
+* acts have different content (action expressions for
+* <code>request</code>, predicate for <code>inform</code>, etc.), any
+* allowed SL content expression can be parsed from here.
+*/
+AbsContentElementList Content():
+{ AbsContentElementList tuple = new AbsContentElementList();  
+  AbsContentElement     val;
+}
+{
+ LBrace() (val=ContentExpression() {tuple.add(val);})+ RBrace()
+ {return tuple;} 
+}
+
+/** Left Brace in all of the possible states of the Token Manager **/
+void LBrace() :
+{}
+{ <LBRACE> | <LBRACE2> } // lbrace2 in the OperatorState of the Token Manager
+
+/** Right Brace in all of the possible states of the Token Manager **/
+void RBrace() :
+{}
+{ <RBRACE> | <RBRACE2> } // rbrace2 in the OperatorState of the Token Manager
+
+
+AbsContentElement ContentExpression():
+{ AbsContentElement val=null; String s; }
+{
+ (   s=String()     { val=new AbsPredicate(s);} // true, false, PropositionSymbol
+   | LBrace()       ( val=ContentExpression_NoBrace() ) RBrace()
+   | s=MetaSymbol() { AbsPredicate val1=new AbsPredicate(s); val1.setIsMetaFormula(true); val=val1;} 
+ )
+ {val.setIsAContentExpression(true); return val;}
+}
+
+
+AbsContentElement ContentExpression_NoBrace() :
+{ AbsContentElement val=null; }
+{
+ (  val=IdentifyingExpression_NoBrace()
+  | val=ActionExpression_NoBrace()
+  | val=Wff_NoBrace() )
+ {return val;}
+}
+
+
+AbsIRE IdentifyingExpression_NoBrace() :
+{ Token t; AbsIRE ire=null; AbsPredicate prop; AbsTerm term; AbsVariable var;}
+{
+ t=<REFERENTIALOP> {if (slType<2) throw new ParseException("NotFullSL_IdentifyExpression_NotParsable_UseAtLeastSL2");} term=Term() /*var=Variable()*/ prop=Wff()
+ { ire = new AbsIRE(t.image); 
+   /*ire.setVariable(var);*/
+   ire.setTerm(term);
+   ire.setProposition(prop); 
+   return ire;}
+}
+
+
+AbsVariable Variable():
+{ AbsVariable val=null; Token v;}
+{
+  v=<VARIABLE>
+  {val = new AbsVariable(); val.setName(v.image.substring(1)); return val;}
+}
+
+
+AbsTerm Term():
+{ Token v; AbsTerm val=null; String s;}
+{
+ (  val=Variable() 
+  | val=Constant()
+  | LBrace() 
+   (   val=FunctionalTerm_NoBrace()
+     | val=ActionExpression_NoBrace()
+     | val=IdentifyingExpression_NoBrace()
+   ) 
+   RBrace() 
+                     // in order to avoid adding a new class that represents a generic AbsTerm, I am reusing AbsVariable. 
+                     // Of course, the methods fromObject/toObject needs to have a similar behaviour. 
+  | s=MetaSymbol() { AbsVariable val1=new AbsVariable(); val1.setName(s); val1.setIsMetaTerm(true); val=val1;} 
+ )
+ {return val;}
+}
+
+
+AbsPrimitive Constant() :
+{ String s; AbsPrimitive val=null; Token t; }
+{
+ (  s= String() { 
+	// if it is true or false, then converts the String into a Boolean
+        if (CaseInsensitiveString.equalsIgnoreCase(s, "true")) 
+	        val = AbsPrimitive.wrap(true);	
+        else if (CaseInsensitiveString.equalsIgnoreCase(s, "false"))  
+	        val = AbsPrimitive.wrap(false);
+	else {
+        if (  (CaseInsensitiveString.equalsIgnoreCase(s,"\"true\""))
+            ||(CaseInsensitiveString.equalsIgnoreCase(s,"\"false\"")) )
+                  // in this case leading/trailing quotes were added by the
+                  // encoder and now they must be removed. 
+                  s = unescape(s);
+		    val = AbsPrimitive.wrap(s);
+        }
+                }
+  | val=Number() 
+  | t=<DATETIME> { 
+    try { 
+      Date d=jade.lang.acl.ISO8601.toDate(t.image);
+      val = AbsPrimitive.wrap(d);
+    } catch (Exception e) { 
+      val = AbsPrimitive.wrap(t.image); 
+                 }
+  }
+  | t=<PREFIXBYTELENGTHENCODEDSTRING> {
+	try {
+		byte[]byteArray = Base64.decodeBase64(t.image.getBytes("US-ASCII"));
+		val = AbsPrimitive.wrap(byteArray);
+	} catch (UnsupportedEncodingException uee) {
+		throw new ParseException("Error decoding byte-array from Base64 US-ASCII, "+uee.getMessage());
+	}
+                                      }
+ )
+ {return val;}
+}
+
+
+AbsConcept FunctionalTerm_NoBrace() :  
+{ Token t; AbsTerm term1, term2; AbsConcept val=null; String s;}
+{
+ (  t=<ARITHMETICOP> term1=Term() term2=Term() 
+    {  	val = new AbsConcept(t.image);
+	try {
+	   String slotNames[] = curOntology.getSchema(t.image).getNames();
+	   val.set(slotNames[0], term1);
+	   val.set(slotNames[1], term2);
+        } catch (Exception e) {
+           val.set(Codec.UNNAMEDPREFIX+"0", term1);
+           val.set(Codec.UNNAMEDPREFIX+"1", term2);
+        }
+    }	
+  | s=String() {
+      if ( (SL0Vocabulary.SET.equalsIgnoreCase(s)) || (SL0Vocabulary.SEQUENCE.equalsIgnoreCase(s))) 
+        val = new AbsAggregate(s);  
+      else {
+        try {
+          val = (AbsConcept) curOntology.getSchema(s).newInstance();
+        }
+        catch (Exception e) {
+          val = new AbsConcept(s);
+        }
+      }
+    }
+   (FunctionalTermParameters(val))?
+ )
+ {return val;} 
+}
+
+// artificial production, needed to avoid a bad warning from javacc
+// val can be either an AbsConcept or an AbsAggregate
+void FunctionalTermParameters(AbsConcept val) :
+{ AbsTerm t; int slotNumber=0;}
+{
+   ( { String slotNames[] = null;
+         try {
+	   slotNames = curOntology.getSchema(val.getTypeName()).getNames();
+         } catch (Exception e) {
+         }
+     }
+     (t=Term() { 
+         try {
+               val.set(slotNames[slotNumber], t);
+         } catch (Exception e) {
+	       val.set(Codec.UNNAMEDPREFIX+slotNumber,t); 
+         }
+        slotNumber++;
+      })+ )
+ | (Parameter(val))+ 
+}
+
+void Parameter(AbsConcept val) :
+{ Token t; AbsTerm term; String slotName;}
+{
+// t.image.substring(1) allows to remove the leading  ':' char
+ (   t=<PARAMETERNAME>        {slotName = t.image.substring(1);}
+   | t=<PARAMETERNAME_STRING> {slotName = unescape(t.image.substring(1));} )
+ term=Term()                  {val.set(slotName,term);}
+
+}
+
+AbsAgentAction ActionExpression_NoBrace() :
+{ AbsAgentAction val=null; AbsTerm term1, term2; Token t;}
+{
+ (  t=<ACTION> term1=Term() term2=Term() 
+     { val = new AbsAgentAction(t.image);
+       try {
+	   String slotNames[] = curOntology.getSchema(t.image).getNames();
+	   val.set(slotNames[0], term1);
+	   val.set(slotNames[1], toAbsAgentAction(term2));
+        } catch (Exception e) {
+           val.set(Codec.UNNAMEDPREFIX+"0", term1);
+           val.set(Codec.UNNAMEDPREFIX+"1", toAbsAgentAction(term2));
+        }
+     }
+  | t=<ACTIONOPLL> {if (slType<2) throw new ParseException("NotFullSL_ActionOperatorExpression_NotParsable");} term1=ActionExpression() term2=ActionExpression()
+     { val = new AbsAgentAction(t.image);
+       try {
+	   String slotNames[] = curOntology.getSchema(t.image).getNames();
+	   val.set(slotNames[0], term1);
+	   val.set(slotNames[1], toAbsAgentAction(term2));
+        } catch (Exception e) {
+           val.set(Codec.UNNAMEDPREFIX+"0", term1);
+           val.set(Codec.UNNAMEDPREFIX+"1", toAbsAgentAction(term2));
+        }
+     }
+ )
+ { return val;}
+}
+
+
+AbsTerm ActionExpression() :
+{ AbsTerm val=null; String s;}
+{ 
+ (  LBrace() val=ActionExpression_NoBrace() RBrace()
+  | s=MetaSymbol() { AbsVariable val1=new AbsVariable(); val1.setName(s); val1.setIsMetaTerm(true); val=val1;} 
+ )
+  {return val;}
+}
+
+
+AbsPredicate Wff() :
+{ AbsPredicate val=null; String s;}
+{
+ (  s=String() { val = new AbsPredicate(s);} // expands to true, false, PropositionSymbol
+  | LBrace() val=Wff_NoBrace() RBrace()
+  | s=MetaSymbol() { val=new AbsPredicate(s); val.setIsMetaFormula(true);} 
+ )
+ {return val;}
+}
+
+AbsPredicate Wff_NoBrace() :
+{ AbsPredicate arg1, arg2, val=null; Token t; AbsTerm term; String s;
+  String slotNames[]=null;}
+{
+ (  t=<UNARYLOGICALOP> {if (slType<1) throw new ParseException("NotFullSL_NotExpression_NotParsable_UseAtLeastSL1");} arg1=Wff() 
+   {val = new AbsPredicate(t.image); 
+    try {
+	   slotNames = curOntology.getSchema(t.image).getNames();
+	   val.set(slotNames[0], arg1);
+        } catch (Exception e) {
+           val.set(Codec.UNNAMEDPREFIX+"0", arg1);
+        }
+   }
+
+  | t=<BINARYLOGICALOP> {if (slType<1) throw new ParseException("NotFullSL_BinaryLogicalExpression_NotParsable_UseAtLeastSL1");} arg1=Wff() arg2=Wff()
+   {val = new AbsPredicate(t.image); 
+    try {
+	   slotNames = curOntology.getSchema(t.image).getNames();
+	   val.set(slotNames[0], arg1);
+	   val.set(slotNames[1], arg2);
+        } catch (Exception e) {
+           val.set(Codec.UNNAMEDPREFIX+"0", arg1);
+           val.set(Codec.UNNAMEDPREFIX+"1", arg2);
+        }
+    }
+
+  | t=<QUANTIFIER> {if (slType<2) throw new ParseException("NotFullSL_QuantifierExpression_NotParsable_UseAtLeastSL2"); AbsVariable var; } 
+    var=Variable() arg1=Wff() 
+   {val = new AbsPredicate(t.image); 
+    try {
+	   slotNames = curOntology.getSchema(t.image).getNames();
+	   val.set(slotNames[0], var);
+	   val.set(slotNames[1], arg1);
+        } catch (Exception e) {
+           val.set(Codec.UNNAMEDPREFIX+"0", var);
+           val.set(Codec.UNNAMEDPREFIX+"1", arg1);
+        }
+    }
+
+  | t=<MODALOP> {if (slType<2) throw new ParseException("NotFullSL_ModalOperatorExpression_NotParsable_UseAtLeastSL2");} term=Term() arg1=Wff()
+   {val = new AbsPredicate(t.image); 
+    try {
+	   slotNames = curOntology.getSchema(t.image).getNames();
+	   val.set(slotNames[0], term);
+	   val.set(slotNames[1], arg1);
+        } catch (Exception e) {
+           val.set(Codec.UNNAMEDPREFIX+"0", term);
+           val.set(Codec.UNNAMEDPREFIX+"1", arg1);
+        }
+    }
+
+  | t=<ACTIONOP> term=ActionExpression() 
+   {val = new AbsPredicate(t.image); 
+    try {
+	   slotNames = curOntology.getSchema(t.image).getNames();
+	   val.set(slotNames[0], term);
+        } catch (Exception e) {
+           val.set(Codec.UNNAMEDPREFIX+"0", term);
+        }
+   }
+   (arg1=Wff() {
+    try {
+	   val.set(slotNames[1], arg1);
+        } catch (Exception e) {
+           val.set(Codec.UNNAMEDPREFIX+"1", arg1);
+        }
+     })?
+  | s=String() {val = new AbsPredicate(s); int slotNumber=0;
+                try {
+	           slotNames = curOntology.getSchema(s).getNames();
+                } catch (Exception e) {
+                }
+              } (term=Term() 
+              { try {
+  	          val.set(slotNames[slotNumber], term);
+              } catch (Exception e) {
+                  val.set(Codec.UNNAMEDPREFIX+slotNumber, term);
+              }
+              slotNumber++; })+
+ )
+ {return val;}
+}
+
+
+AbsPrimitive Number():
+{  Token t; AbsPrimitive val = null;}
+{ 
+ (  t = <INTEGER> { 
+                  try {
+                   val = AbsPrimitive.wrap(Integer.parseInt(t.image));
+                  } catch (NumberFormatException e) { //should never happen
+		   e.printStackTrace();
+                   val=AbsPrimitive.wrap(t.image);
+                  }
+                 }
+ | t = <HEXINTEGER> { val=AbsPrimitive.wrap(t.image); } 
+ | t = <LONG> { String longStr;
+                  try {
+                   longStr = t.image.substring(0, t.image.length() - 1);
+                   val = AbsPrimitive.wrap(Long.parseLong(longStr));
+                  } catch (NumberFormatException e) { //should never happen
+		    e.printStackTrace();
+                    val=AbsPrimitive.wrap(t.image);
+                  }
+                 }
+ | t = <FLOATONE> { double d1;
+                   try {
+                    // J2ME incompatible d1=Double.parseDouble(t.image); 
+		    d1=(new Double(t.image)).doubleValue();
+		    val=AbsPrimitive.wrap(d1);
+                  } catch (NumberFormatException e) { //should never happen
+		    e.printStackTrace();
+                    val=AbsPrimitive.wrap(t.image);
+                  }
+                 }
+ | t = <FLOATTWO> { double d2;
+                   try {
+                    // J2ME incompatible d2=Double.parseDouble(t.image); 
+		    d2=(new Double(t.image)).doubleValue();
+		    val=AbsPrimitive.wrap(d2);
+                  } catch (NumberFormatException e) { //should never happen
+		    e.printStackTrace();
+                    val=AbsPrimitive.wrap(t.image);
+                  }
+                 }
+ | t = <FLOAT> { String floatStr;
+                  try {
+                   floatStr = t.image.substring(0, t.image.length() - 1);
+                   val = AbsPrimitive.wrap((new Float(floatStr)).floatValue());
+                  } catch (NumberFormatException e) { //should never happen
+		    e.printStackTrace();
+                    val=AbsPrimitive.wrap(t.image);
+                  }
+                 }
+ )
+{return val;}
+}
+
+
+/**
+* <p> <code> String = WORD | STRING_LITERAL  </code>
+*/
+String String() :
+{ Token t;}
+{
+   t=<WORD2>  		{return t.image;}            
+ | t=<STRING_LITERAL2>  {if (  (CaseInsensitiveString.equalsIgnoreCase(t.image,"\"true\""))
+                             ||(CaseInsensitiveString.equalsIgnoreCase(t.image,"\"false\"")) )
+                            // in this case leading/trailing quotes must be left
+                            // otherwise the value is confused with a boolean
+                            return t.image;  
+                         else
+                            return unescape(t.image);}
+ | t=<WORD>		{return t.image;}            
+ | t=<STRING_LITERAL>	{if (  (CaseInsensitiveString.equalsIgnoreCase(t.image,"\"true\""))
+                             ||(CaseInsensitiveString.equalsIgnoreCase(t.image,"\"false\"")) )
+                            // in this case leading/trailing quotes must be left
+                            // otherwise the value is confused with a boolean
+                            return t.image;  
+                         else
+                            return unescape(t.image);}
+}
+ 
+
+/** This grammar rule is an extension to the FIPA SL Grammar. It is specific to the semantics framework.
+    It allows to represent a symbol which is not matched by any FIPA-SL token. **/
+String MetaSymbol():
+{ Token t;}
+{ 
+  (t=<METASYMBOL> | t=<METASYMBOL2>)
+     { if (!metaAllowed) throw new ParseException(META_EXCEPTION_MESSAGE); else return t.image;}
+}
+
+
+
+
+/*   T O K E N    D E F I N I T I O N  */
+
+<DEFAULT>
+SKIP :
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+}
+
+<DEFAULT>
+TOKEN:
+{
+  < LBRACE     : "("       > : OPERATORSTATE
+| < RBRACE     : ")"       >
+| < VARIABLE   : "?" <WORD> | "?" <STRING_LITERAL> >
+| < INTEGER    : (["+","-"])? (["0"-"9"])+ >
+| < HEXINTEGER : (["+","-"])? "0" ["x","X"] (["0"-"9" , "a"-"f" , "A"-"F"])+ >
+| < LONG    : (["+","-"])? (["0"-"9"])+ "L" >
+| < FLOATONE :      (["+","-"])? ((["0"-"9"])+ "." (["0"-"9"])* | (["0"-"9"])* "." (["0"-"9"])+)
+                    (["e","E"] (["-","+"])? (["0"-"9"])+)? >
+| < FLOATTWO :      (["+","-"])? (["0"-"9"])+ ["e","E"] (["-","+"])? (["0"-"9"])+  >
+| < FLOAT :      (["+","-"])? ((["0"-"9"])+ "." (["0"-"9"])* | (["0"-"9"])* "." (["0"-"9"])+) "F"  >
+| < WORD: (~["\u0000"-"\u0020","(",")","\"","#","0"-"9",":","-","?"]) 
+          (~["\u0000"-"\u0020","(",")","\""])* >
+| < STRING_LITERAL:
+      "\""
+      ( (~["\""]) | "\\\"" )*
+      "\""
+  >
+| < PARAMETERNAME : ":"<WORD> >
+| < PARAMETERNAME_STRING : ":"<STRING_LITERAL> >
+| < DATETIME :  (["0"-"9"]) (["0"-"9"]) (["0"-"9"]) (["0"-"9"])
+                (["0"-"9"]) (["0"-"9"]) (["0"-"9"]) (["0"-"9"]) ["t","T"]
+                (["0"-"9"]) (["0"-"9"]) (["0"-"9"]) (["0"-"9"])
+                (["0"-"9"]) (["0"-"9"]) (["0"-"9"]) (["0"-"9"]) (["0"-"9"]) (["a"-"z","A"-"Z"])? > 
+| <PREFIXBYTELENGTHENCODEDSTRING :  "#" <INTEGER> "\"" > 
+    {
+      String tmp = matchedToken.image.substring(1,matchedToken.image.length()-1);
+      int numBytes = Integer.parseInt(tmp);
+      if (numBytes < 0) {
+        throw new TokenMgrError("ERROR: PrefixByteLengthEncodedString with length < 0", 
+                                TokenMgrError.STATIC_LEXER_ERROR);
+      }    
+      char[] bytes = new char[numBytes];
+      int i = 0; 
+      
+      while (numBytes-- > 0) 
+        try {
+          bytes[i++] = input_stream.readChar(); 
+        } 
+      catch (IOException e) {
+        System.out.println("IOException during PREFIXBYTELENGTHENCODEDSTRING");
+        throw new TokenMgrError(true, curLexState, input_stream.getEndLine(), 
+                                input_stream.getEndColumn(),input_stream.GetImage(), 
+                                curChar, TokenMgrError.LEXICAL_ERROR);
+      }	
+      // If you want, you can add bytes to matchedToken.image here.
+      matchedToken.image = new String(bytes);
+    }
+| <METASYMBOL : "??"<WORD> > //see javadoc of method MetaSymbol()
+}
+
+
+<OPERATORSTATE>
+SKIP :
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+}
+
+<OPERATORSTATE>
+TOKEN:
+{
+  < LBRACE2     : "("       > : OPERATORSTATE
+| < RBRACE2     : ")"       > : DEFAULT
+| < ACTION     : "action"  > : DEFAULT
+| < REFERENTIALOP : "iota" | "any" | "all" > : DEFAULT
+| < MODALOP    : "B" | "U" | "PG" | "I" > : DEFAULT
+| < ARITHMETICOP : "+" | "-" | "*" | "/" | "%" > : DEFAULT
+| < ACTIONOP   : "feasible" | "done" > : DEFAULT
+| < ACTIONOPLL : "|" | ";" > : DEFAULT // action operator low level
+| < UNARYLOGICALOP : "not" > : DEFAULT
+| < BINARYLOGICALOP : "and" | "or" | "implies" | "equiv" > : DEFAULT
+| < QUANTIFIER : "forall" | "exists" > : DEFAULT
+| < WORD2: (~["\u0000"-"\u0020","(",")","\"","#","0"-"9",":","-","?"]) 
+          (~["\u0000"-"\u0020","(",")","\""])* > : DEFAULT
+| < STRING_LITERAL2:
+      "\""
+      ( (~["\""]) | "\\\"" )*
+      "\""
+  > :DEFAULT
+| <METASYMBOL2 : "??"<WORD2> > : DEFAULT //see javadoc of method MetaSymbol()
+}

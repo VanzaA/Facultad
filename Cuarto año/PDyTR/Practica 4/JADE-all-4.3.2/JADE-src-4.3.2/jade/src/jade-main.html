@@ -1,0 +1,73 @@
+<body>
+
+<b>JADE</b> (<em>Java Agent Development Environment</em>) is a
+software framework to make easy the development of agent applications
+in compliance with the <em><b>FIPA</b></em> specifications for
+interoperable intelligent multi-agent systems. The goal of <b>JADE</b>
+is to ease development while ensuring standard compliance through a
+comprehensive set of system services and agents.
+
+To achieve such a goal, <b>JADE</b> offers the following features to
+the agent programmer:
+
+<ol>
+
+<li><em>FIPA-compliant Agent Platform</em>, including the
+<em>AMS</em>, the <em>ACC</em> and the default <em>DF</em> mandatory
+system agents. All these three agents are automatically activated at
+platform startup.
+
+<li><em>Distributed Agent Platform</em>. The agent platform can be
+split on several hosts and only one Java Virtual Machine is executed
+on each node. Agents are implemented as Java threads and a suitable
+transport is chosen for message delivery, depending upon relative
+location of sender and receiver agents.
+
+<li><em>Multiple Domains support</em>. A number of
+<em><b>FIPA</b></em> compliant <em>DF</em> agents can be started at
+runtime and linked in a federation, thereby implementing a multiple
+domain agent environment.
+
+<li><em>Multithreaded execution environment with two-level
+scheduling</em>. Every <b>JADE</b> agent runs within its own thread of
+control, but also is able to run multiple <em>behaviours</em>
+concurrently. A preemptive scheduling is performed among all agents
+within a single Java Virtual Machine, whereas cooperative scheduling
+is used for the various task of a single agent.
+
+<li><em>Oject Oriented programming environment</em>. Most concepts
+present in <em><b>FIPA</b></em> specifications are represented as Java
+classes, so that a uniform programming interface is presented to
+users. For example, <em>ACL</em> messages and
+<code>fipa-agent-management</code> ontology objects all have a
+suitable Java counterpart.
+
+<li><em>Library of interaction protocols</em>. Ready to use behaviour
+objects are provided for the standard interaction protocols such as
+<code>fipa-request</code> and <code>fipa-contract-net</code>. To build
+an agent that can act according to an interaction protocol,
+application developers just need to implement domain specific actions,
+while all application independent protocol logic will be carried out
+by <b>JADE</b> framework.
+
+<li><em>Administration GUI</em>. Common platform management operations
+can be performed through a graphical user interface, showing active
+agents and agent containers. Using this <em>GUI</em>, platform
+administrators can create, destroy, suspend and resume agents, besides
+creating domain hierarchies with multiple federated <em>DF</em> agents.
+
+</ol>
+
+<b>JADE</b> is entirely written using the <em>Java</em> programming
+language, exploiting such advanced features as <em>Java RMI</em>,
+<em>Java CORBA IDL</em>, <em> Java Serialization</em> and <em>Java
+Reflection API</em>.
+
+<b>JADE</b> is a trademark of {@link <a href="http://www.cselt.it"></a>
+<b><em>CSELT</em></b>}; <b>JADE</b> has been developed jointly by
+{@link <a href="http://www.cselt.it"></a> <em>CSELT</em>} and the
+{@link <a href="http://www.ce.unipr.it"></a> <b><em>Computer
+Engineering Group</em></b>} of {@link <a
+href="http://www.unipr.it"></a> <em>University of Parma</em>}.
+
+</body>

@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+Class-Path: jadeTools.jar commons-codec/commons-codec-1.3.jar http.jar
+Main-Class: jade.Boot
