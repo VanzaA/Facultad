@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.FileInputStream;
 
-public class AgentePunto3 extends Agent
+public class AgenteTCP extends Agent
 {
     private String action;
     private String sourcePath;
