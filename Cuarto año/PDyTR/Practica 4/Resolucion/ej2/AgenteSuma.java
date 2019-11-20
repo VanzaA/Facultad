@@ -25,13 +25,19 @@ public class AgenteSuma extends Agent
         System.out.println("\nNo fue posible migrar el agente\n");}
     }
 
-    protected void afterMove()
+    protected void afterMove(Object[] args)
     {
         Location actual = here();
 
         if (!actual.getName().equals(this.origen.getName())) {
             try {
-                List<String> numbers = Files.readAllLines(Paths.get("/tmp/file"), Charset.forName("utf8"));
+                if (args.length != 1)
+                    {
+                        System.out.println("es necesario indicar el path del archivo a sumar");
+                        System.exit(1);
+                    }
+                String path = (String) args[0];
+                List<String> numbers = Files.readAllLines(Paths.get(path), Charset.forName("utf8"));
                 int result = 0;
                 for (String number: numbers) {
                     result += Integer.parseInt(number);
