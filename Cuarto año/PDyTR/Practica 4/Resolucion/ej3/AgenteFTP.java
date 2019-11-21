@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.FileInputStream;
 
-public class AgenteTCP extends Agent
+public class AgenteFTP extends Agent
 {
     private String action;
     private String sourcePath;
@@ -95,7 +95,7 @@ public class AgenteTCP extends Agent
     private byte[] read(String path, int position)
     {
         try {
-            int chunck = 2000;
+            int chunck = 2048;
             int noBytes = ((int)this.fileSize - this.actualSize) < chunck ? (int)(this.fileSize - this.actualSize) : chunck;
             System.out.printf("Leyendo %d bytes a partir de %d\n", noBytes, this.actualSize);
             InputStream in = new FileInputStream(path);
