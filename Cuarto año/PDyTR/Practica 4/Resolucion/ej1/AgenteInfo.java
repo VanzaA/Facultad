@@ -3,12 +3,14 @@ import jade.util.leap.Serializable;
 import jade.wrapper.ContainerController;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.lang.management.ManagementFactory;
+import com.sun.management.OperatingSystemMXBean;
 
 public class AgenteInfo extends Agent
 {
 
 	private int index;
-	private long startTime;
+	private double startTime;
 	private Location origen;
 	private ArrayList<String> contenedores  = new ArrayList<String>();
 	private ArrayList<ContainerInfo> info = new ArrayList<ContainerInfo>();
@@ -64,7 +66,7 @@ public class AgenteInfo extends Agent
 	}
 
 	private void remoteAction(Location actual) {
-		long startContainerTime =System.currentTimeMillis();    
+		double startContainerTime =System.currentTimeMillis();    
 		
 		ContainerInfo currentContainerInfo= new ContainerInfo();
 		
@@ -80,7 +82,11 @@ public class AgenteInfo extends Agent
 			System.out.println("\nMigrando el agente a " + destino.getID());
 			
 			info.add(currentContainerInfo);
-			long finishContainerTime=System.currentTimeMillis() - startContainerTime;
+			double finishContainerTime=System.currentTimeMillis() - startContainerTime;
+			OperatingSystemMXBean processing = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+			double processLoad = processing.getProcessCpuLoad();
+			System.out.println(processLoad);
+			currentContainerInfo.setProcessLoad(processLoad);
 			currentContainerInfo.setProcessingTime(finishContainerTime);
 			
 			doMove(destino);
@@ -90,16 +96,15 @@ public class AgenteInfo extends Agent
 	}
 
 	private void originAction() {
-		long finishTime=System.currentTimeMillis() - startTime;
+		double finishTime=System.currentTimeMillis() - startTime;
 		System.out.println("\n\n-----------------------------------------------------------");
 		System.out.println("Termine la vuelta, tiempo total: "+ finishTime +" milisegundos");
 		
 		for (ContainerInfo containerInfo : info) {
 			System.out.println("\n\nInformacion container " + containerInfo.getName() + " :");
 			System.out.println("  Memoria libre: "+ (containerInfo.getFreeMemory()/1024)/1024 + "Mb");
-			float processingPercentage = (containerInfo.getProcessingTime()*100)/finishTime;
-			System.out.println("  Carga de procesamiento: " + processingPercentage + "%");
 			System.out.println("  Tiempo de procesamiento: " + containerInfo.getProcessingTime() + " milisegundos");
+			System.out.println("  Carga de procesamiento: " + containerInfo.getProcessLoad() + "%");
 		}
 	}
 
@@ -117,7 +122,8 @@ public class AgenteInfo extends Agent
 	public class ContainerInfo implements Serializable {
 		
 		private String name;
-		private long processingTime;
+		private double processLoad;
+		private double processingTime;
 		private long freeMemory;
 
 		public String getName() {
@@ -126,10 +132,18 @@ public class AgenteInfo extends Agent
 		public void setName(String name) {
 			this.name = name;
 		}
-		public long getProcessingTime() {
+		public void setProcessLoad(double processLoad){
+			this.processLoad = processLoad;
+		}
+
+		public double getProcessLoad() {
+			return processLoad;
+		}
+
+		public double getProcessingTime() {
 			return processingTime;
 		}
-		public void setProcessingTime(long processingTime) {
+		public void setProcessingTime(double processingTime) {
 			this.processingTime = processingTime;
 		}
 		public long getFreeMemory() {
